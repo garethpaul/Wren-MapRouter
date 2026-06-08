@@ -35,6 +35,11 @@ Contribution rules:
 
 ## Security And Responsible Use
 
+Canonical security policy and reporting:
+
+- [`SECURITY.md`](SECURITY.md)
+
+
 Routes and locations are sensitive. The app should avoid retaining route
 history, should make external URL forwarding clear, and should keep location
 permissions explicit.
