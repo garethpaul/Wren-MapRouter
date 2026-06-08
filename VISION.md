@@ -39,7 +39,7 @@ Routes and locations are sensitive. The app should avoid retaining route
 history, should make external URL forwarding clear, and should keep location
 permissions explicit.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Hidden route storage
 - Silent forwarding to unexpected services
