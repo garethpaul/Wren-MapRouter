@@ -74,4 +74,4 @@ Keep changes small and tied to the project that is already present in this repos
 
 Prior README summary:
 
-> Wren-MapRouter <!-- README-OVERVIEW-IMAGE --> Router
+> Wren-MapRouter Router
