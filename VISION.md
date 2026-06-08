@@ -45,3 +45,6 @@ permissions explicit.
 - Silent forwarding to unexpected services
 - Location upload behavior
 - Modernization that changes routing semantics without documentation
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
