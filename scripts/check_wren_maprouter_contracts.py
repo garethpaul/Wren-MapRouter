@@ -98,6 +98,13 @@ def main():
         failures,
     )
     require(
+        "kCLAuthorizationStatusDenied" in app
+        and "kCLAuthorizationStatusRestricted" in app
+        and "clearPendingRoute" in app,
+        "denied or restricted location access must clear pending route state",
+        failures,
+    )
+    require(
         "currentSourceNeedsLocation" in app and "currentDestinationNeedsLocation" in app,
         "directions requests must remember which endpoint depends on current location",
         failures,
