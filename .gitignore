@@ -14,9 +14,14 @@ build/
 xcuserdata
 profile
 *.moved-aside
-DerivedData
+DerivedData/
+*.xcuserstate
 .idea/
 
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+
+# Local configuration
+.env
+.env.*
