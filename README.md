@@ -46,6 +46,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
+- `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
+- `make verify` - checks Maps directions registration, location permission metadata, GeoJSON validity, route parsing guards, and external URL forwarding
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -53,6 +55,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Configuration and Secrets
 
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
+- The app uses current location only to resolve a Maps directions endpoint that explicitly uses Current Location. Do not add route or location persistence without a privacy plan.
 
 ## Security and Privacy Notes
 

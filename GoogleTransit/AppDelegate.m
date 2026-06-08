@@ -17,6 +17,8 @@
 
 @property (nonatomic, strong) NSString *currentSource;
 @property (nonatomic, strong) NSString *currentDestination;
+@property (nonatomic, assign) BOOL currentSourceNeedsLocation;
+@property (nonatomic, assign) BOOL currentDestinationNeedsLocation;
 
 @end
 
@@ -27,73 +29,167 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor blackColor];
     [self.window makeKeyAndVisible];
-	
+
 	self.locationManager = [[CLLocationManager alloc] init];
 	self.locationManager.delegate = self;
-	
+
     return YES;
 }
 
 - (void) applicationDidBecomeActive:(UIApplication *)application
 {
-	[self.locationManager startUpdatingLocation];
+	[self startLocationUpdatesIfNeeded];
 }
 
 - (void) applicationWillResignActive:(UIApplication *)application
 {
-	[self.locationManager stopUpdatingLocation];
+	[self clearPendingRoute];
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
 {
 	if ([MKDirectionsRequest isDirectionsRequestURL:url]){
-		
+
 		self.currentSource = nil;
 		self.currentDestination = nil;
-		
+		self.currentSourceNeedsLocation = NO;
+		self.currentDestinationNeedsLocation = NO;
+
 		MKDirectionsRequest *directionsRequest = [[MKDirectionsRequest alloc] initWithContentsOfURL:url];
-		
-		if (!directionsRequest.source.isCurrentLocation){
-			self.currentSource = [NSString stringWithFormat:@"%f,%f", directionsRequest.source.placemark.location.coordinate.latitude,
-					  directionsRequest.source.placemark.location.coordinate.longitude];
-		} else if (self.currentLocation){
-			self.currentSource = [NSString stringWithFormat:@"%f,%f", self.currentLocation.coordinate.latitude, self.currentLocation.coordinate.longitude];
-		}
-		
-		if (!directionsRequest.destination.isCurrentLocation){
-			self.currentDestination = [NSString stringWithFormat:@"%f,%f", directionsRequest.destination.placemark.location.coordinate.latitude,
-						   directionsRequest.destination.placemark.location.coordinate.longitude];
-		} else if (self.currentLocation){
-			self.currentDestination = [NSString stringWithFormat:@"%f,%f", self.currentLocation.coordinate.latitude, self.currentLocation.coordinate.longitude];
-		}
-		
-		if (self.currentSource && self.currentDestination){
-			[self openTransitDirections];
-		}
-		
+
+		self.currentSourceNeedsLocation = directionsRequest.source.isCurrentLocation;
+		self.currentDestinationNeedsLocation = directionsRequest.destination.isCurrentLocation;
+		self.currentSource = [self coordinateStringForMapItem:directionsRequest.source];
+		self.currentDestination = [self coordinateStringForMapItem:directionsRequest.destination];
+
+		[self startLocationUpdatesIfNeeded];
+		[self openTransitDirections];
+
 		return YES;
 	}
 	return NO;
 }
 
+- (void) startLocationUpdatesIfNeeded
+{
+	if (![self routeNeedsCurrentLocation]){
+		return;
+	}
+
+	if (![CLLocationManager locationServicesEnabled]){
+		[self clearPendingRoute];
+		return;
+	}
+
+	CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+	if (status == kCLAuthorizationStatusNotDetermined){
+		if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]){
+			[self.locationManager requestWhenInUseAuthorization];
+		} else {
+			[self.locationManager startUpdatingLocation];
+		}
+		return;
+	}
+
+	BOOL authorized = status == kCLAuthorizationStatusAuthorized;
+#ifdef __IPHONE_8_0
+	authorized = authorized ||
+		status == kCLAuthorizationStatusAuthorizedAlways ||
+		status == kCLAuthorizationStatusAuthorizedWhenInUse;
+#endif
+
+	if (authorized){
+		[self.locationManager startUpdatingLocation];
+	} else if (status == kCLAuthorizationStatusDenied ||
+			   status == kCLAuthorizationStatusRestricted){
+		[self clearPendingRoute];
+	}
+}
+
+- (BOOL) routeNeedsCurrentLocation
+{
+	return self.currentSourceNeedsLocation || self.currentDestinationNeedsLocation;
+}
+
+- (NSString *) coordinateStringForMapItem:(MKMapItem *)mapItem
+{
+	if (!mapItem){
+		return nil;
+	}
+
+	if (mapItem.isCurrentLocation){
+		return [self coordinateStringForLocation:self.currentLocation];
+	}
+
+	return [self coordinateStringForLocation:mapItem.placemark.location];
+}
+
+- (NSString *) coordinateStringForLocation:(CLLocation *)location
+{
+	if (!location){
+		return nil;
+	}
+
+	CLLocationCoordinate2D coordinate = location.coordinate;
+	if (!CLLocationCoordinate2DIsValid(coordinate)){
+		return nil;
+	}
+
+	return [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
+}
+
+- (void) fillCurrentLocationRouteEndpoints
+{
+	NSString *currentLocationString = [self coordinateStringForLocation:self.currentLocation];
+	if (!currentLocationString){
+		return;
+	}
+
+	if (self.currentSourceNeedsLocation){
+		self.currentSource = currentLocationString;
+	}
+
+	if (self.currentDestinationNeedsLocation){
+		self.currentDestination = currentLocationString;
+	}
+}
+
+- (void) clearPendingRoute
+{
+	self.currentSource = nil;
+	self.currentDestination = nil;
+	self.currentSourceNeedsLocation = NO;
+	self.currentDestinationNeedsLocation = NO;
+	self.currentLocation = nil;
+	[self.locationManager stopUpdatingLocation];
+}
+
 - (void) openTransitDirections
 {
+	[self fillCurrentLocationRouteEndpoints];
+
 	if (self.currentSource && self.currentDestination){
 		NSString *directionsURLString = [NSString stringWithFormat:@"https://maps.google.com/maps?f=d&source=s_d&saddr=%@&daddr=%@&hl=en&vps=3&jsv=432b&vpsrc=0&gl=us&dirflg=r&ttype=now&noexp=0&noal=0&sort=def&mra=atm&ie=UTF8&ui=maps_mini",
 										 self.currentSource, self.currentDestination];
-		
+
 		NSURL *directionsURL = [NSURL URLWithString:directionsURLString];
-		
-		self.currentSource = nil;
-		self.currentDestination = nil;
-		
+
+		[self clearPendingRoute];
+
 		[self openURL:directionsURL];
 	}
 }
 
 - (void) openURL:(NSURL *)url
 {
-	[[UIApplication sharedApplication] openURL:url];
+	if (!url){
+		return;
+	}
+
+	UIApplication *application = [UIApplication sharedApplication];
+	if ([application canOpenURL:url]){
+		[application openURL:url];
+	}
 }
 
 - (void)locationManager:(CLLocationManager *)manager
@@ -101,6 +197,16 @@
 {
 	self.currentLocation = [locations lastObject];
 	[self openTransitDirections];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+	[self startLocationUpdatesIfNeeded];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+	[self clearPendingRoute];
 }
 
 @end
