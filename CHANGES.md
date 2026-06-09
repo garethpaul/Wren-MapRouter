@@ -2,6 +2,8 @@
 
 ## 2026-06-08
 
+- Restricted external forwarding to HTTPS Google Maps URLs before calling
+  `openURL`.
 - Limited declared Maps directions modes to transit-compatible route types.
 - Added docs-plan coverage to the static MapRouter contract checker.
 - Added static contracts for the legacy MapKit directions handler, location permission metadata, and bundled GeoJSON artifact.

@@ -186,10 +186,20 @@
 		return;
 	}
 
+	if (![self isAllowedExternalURL:url]){
+		return;
+	}
+
 	UIApplication *application = [UIApplication sharedApplication];
 	if ([application canOpenURL:url]){
 		[application openURL:url];
 	}
+}
+
+- (BOOL) isAllowedExternalURL:(NSURL *)url
+{
+	return [[url scheme] isEqualToString:@"https"] &&
+		[[url host] isEqualToString:@"maps.google.com"];
 }
 
 - (void)locationManager:(CLLocationManager *)manager

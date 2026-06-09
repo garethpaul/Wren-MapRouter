@@ -17,13 +17,14 @@ Priority:
 - Preserve MapKit directions URL detection and forwarding behavior
 - Keep current-location use visible and permission-aware
 - Treat Google Maps URL parameters as legacy assumptions
+- Restrict external forwarding to the documented Google Maps endpoint
 - Avoid storing route or location history
 
 Next priorities:
 
 - Add README setup notes and expected route behavior
 - Document location permission requirements
-- Add validation around incoming directions URLs
+- Add route URL encoding tests
 - Decide whether the sample is archived or should target modern Maps APIs
 
 Contribution rules:

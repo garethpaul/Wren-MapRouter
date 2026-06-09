@@ -13,6 +13,7 @@ DOCS_PLANS = ROOT / "docs/plans"
 CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-08-maprouter-location-url-contracts.md",
     DOCS_PLANS / "2026-06-08-maprouter-transit-mode-scope.md",
+    DOCS_PLANS / "2026-06-08-maprouter-external-url-allowlist.md",
 ]
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
@@ -142,6 +143,19 @@ def main():
     require(
         "canOpenURL:url" in app,
         "external map forwarding must check canOpenURL before opening",
+        failures,
+    )
+    require(
+        "isAllowedExternalURL" in app
+        and 'isEqualToString:@"https"' in app
+        and 'isEqualToString:@"maps.google.com"' in app,
+        "external URL forwarding must be restricted to HTTPS Google Maps URLs",
+        failures,
+    )
+    require(
+        "[self isAllowedExternalURL:url]" in app
+        and app.index("[self isAllowedExternalURL:url]") < app.index("canOpenURL:url"),
+        "external URL allowlist must be checked before canOpenURL/openURL",
         failures,
     )
     require(
