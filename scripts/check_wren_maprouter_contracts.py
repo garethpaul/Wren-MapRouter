@@ -10,7 +10,17 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_PLANS = ROOT / "docs/plans"
-CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-maprouter-location-url-contracts.md"
+CANONICAL_PLANS = [
+    DOCS_PLANS / "2026-06-08-maprouter-location-url-contracts.md",
+    DOCS_PLANS / "2026-06-08-maprouter-transit-mode-scope.md",
+]
+TRANSIT_MODES = {
+    "MKDirectionsModeBus",
+    "MKDirectionsModeFerry",
+    "MKDirectionsModeStreetcar",
+    "MKDirectionsModeSubway",
+    "MKDirectionsModeTrain",
+}
 
 
 def read_text(relative_path):
@@ -76,6 +86,12 @@ def main():
         "Info.plist must not duplicate MKDirections supported modes",
         failures,
     )
+    non_transit_modes = sorted(set(modes) - TRANSIT_MODES)
+    require(
+        not non_transit_modes,
+        "Info.plist must only advertise transit-compatible modes: " + ", ".join(non_transit_modes),
+        failures,
+    )
     require(
         geojson.get("type") == "MultiPolygon",
         "Directions.geojson must remain a MultiPolygon coverage artifact",
@@ -134,7 +150,8 @@ def main():
         failures,
     )
     require(DOCS_PLANS.is_dir(), "docs/plans must exist", failures)
-    require(CANONICAL_PLAN in plans, f"{CANONICAL_PLAN.relative_to(ROOT)} must be present", failures)
+    for plan in CANONICAL_PLANS:
+        require(plan in plans, f"{plan.relative_to(ROOT)} must be present", failures)
     for plan in plans:
         text = plan.read_text(encoding="utf-8")
         require(

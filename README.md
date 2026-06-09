@@ -72,6 +72,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-maprouter-location-url-contracts.md` for the
   current location and URL-routing baseline.
+- See `docs/plans/2026-06-08-maprouter-transit-mode-scope.md` for the declared
+  transit-mode scope.
 
 ## Contributing
 

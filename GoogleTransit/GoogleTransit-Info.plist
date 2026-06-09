@@ -39,17 +39,11 @@
 	<true/>
 	<key>MKDirectionsApplicationSupportedModes</key>
 	<array>
-		<string>MKDirectionsModePlane</string>
-		<string>MKDirectionsModeBike</string>
 		<string>MKDirectionsModeBus</string>
-		<string>MKDirectionsModeCar</string>
 		<string>MKDirectionsModeFerry</string>
-		<string>MKDirectionsModePedestrian</string>
 		<string>MKDirectionsModeStreetcar</string>
 		<string>MKDirectionsModeSubway</string>
-		<string>MKDirectionsModeTaxi</string>
 		<string>MKDirectionsModeTrain</string>
-		<string>MKDirectionsModeOther</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Wren MapRouter uses your current location only when a Maps directions request uses Current Location as a route endpoint.</string>
