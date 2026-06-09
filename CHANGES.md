@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Cleared pending route state when CoreLocation returns no location or an
+  invalid coordinate update.
+- Added static checker coverage for location update validation.
 - Cleared pending route state when a non-location directions request is missing
   either endpoint.
 - Added static checker coverage for incomplete route cleanup before external

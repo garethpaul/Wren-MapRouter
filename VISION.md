@@ -23,6 +23,7 @@ Priority:
 - Escape route query delimiters in encoded endpoints
 - Clear pending route state when endpoint encoding fails
 - Clear incomplete non-location routes before external URL construction
+- Clear pending routes when CoreLocation updates are missing or invalid
 - Avoid storing route or location history
 
 Next priorities:

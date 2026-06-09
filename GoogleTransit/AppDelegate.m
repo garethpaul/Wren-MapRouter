@@ -232,7 +232,13 @@
 - (void)locationManager:(CLLocationManager *)manager
 	 didUpdateLocations:(NSArray *)locations
 {
-	self.currentLocation = [locations lastObject];
+	CLLocation *latestLocation = [locations lastObject];
+	if (!latestLocation || !CLLocationCoordinate2DIsValid(latestLocation.coordinate)){
+		[self clearPendingRoute];
+		return;
+	}
+
+	self.currentLocation = latestLocation;
 	[self openTransitDirections];
 }
 

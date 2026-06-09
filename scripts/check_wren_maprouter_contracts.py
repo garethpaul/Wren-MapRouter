@@ -19,6 +19,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-09-maprouter-external-path-allowlist.md",
     DOCS_PLANS / "2026-06-09-maprouter-encoding-failure-cleanup.md",
     DOCS_PLANS / "2026-06-09-maprouter-incomplete-route-cleanup.md",
+    DOCS_PLANS / "2026-06-09-maprouter-location-update-validation.md",
 ]
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
@@ -218,6 +219,30 @@ def main():
         and incomplete_return_index != -1
         and incomplete_route_index < wait_for_location_index < incomplete_cleanup_index < incomplete_return_index < encode_source_index,
         "incomplete non-location routes must clear pending state before endpoint encoding",
+        failures,
+    )
+    location_update_index = app.find("didUpdateLocations")
+    latest_location_index = app.find("CLLocation *latestLocation = [locations lastObject];", location_update_index)
+    invalid_location_index = app.find(
+        "if (!latestLocation || !CLLocationCoordinate2DIsValid(latestLocation.coordinate))",
+        latest_location_index,
+    )
+    invalid_cleanup_index = app.find("[self clearPendingRoute];", invalid_location_index)
+    invalid_return_index = app.find("return;", invalid_cleanup_index)
+    assign_location_index = app.find("self.currentLocation = latestLocation;", invalid_return_index)
+    require(
+        latest_location_index != -1
+        and invalid_location_index != -1
+        and invalid_cleanup_index != -1
+        and invalid_return_index != -1
+        and assign_location_index != -1
+        and latest_location_index < invalid_location_index < invalid_cleanup_index < invalid_return_index < assign_location_index,
+        "location updates must clear pending routes before storing missing or invalid coordinates",
+        failures,
+    )
+    require(
+        "self.currentLocation = [locations lastObject]" not in app,
+        "location updates must not store unvalidated latest locations",
         failures,
     )
     require(DOCS_PLANS.is_dir(), "docs/plans must exist", failures)
