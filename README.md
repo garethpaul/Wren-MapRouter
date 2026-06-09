@@ -49,7 +49,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
 - `make verify` - checks Maps directions registration, location permission
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
-  URL forwarding allowlists and route endpoint encoding
+  URL forwarding host/path allowlists and route endpoint encoding
 - Completed maintenance plans live under `docs/plans` and are checked by
   `make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
@@ -80,6 +80,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   Google Maps forwarding allowlist.
 - See `docs/plans/2026-06-09-maprouter-route-endpoint-encoding.md` for route
   endpoint encoding before external forwarding.
+- See `docs/plans/2026-06-09-maprouter-external-path-allowlist.md` for the
+  Google Maps `/maps` path allowlist.
 
 ## Contributing
 

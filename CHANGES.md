@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Restricted external Google Maps forwarding to the expected `/maps` route
+  path in addition to HTTPS host allowlisting.
+- Added static checker coverage for the external URL path allowlist.
 - Encoded route source and destination endpoint strings before formatting the
   Google Maps forwarding URL.
 - Added static checker coverage for route endpoint URL encoding.

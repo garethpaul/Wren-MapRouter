@@ -18,6 +18,7 @@ Priority:
 - Keep current-location use visible and permission-aware
 - Treat Google Maps URL parameters as legacy assumptions
 - Restrict external forwarding to the documented Google Maps endpoint
+- Restrict external forwarding to the expected Google Maps route path
 - Encode route endpoints before external URL forwarding
 - Avoid storing route or location history
 

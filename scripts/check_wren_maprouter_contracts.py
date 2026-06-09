@@ -15,6 +15,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-08-maprouter-transit-mode-scope.md",
     DOCS_PLANS / "2026-06-08-maprouter-external-url-allowlist.md",
     DOCS_PLANS / "2026-06-09-maprouter-route-endpoint-encoding.md",
+    DOCS_PLANS / "2026-06-09-maprouter-external-path-allowlist.md",
 ]
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
@@ -151,6 +152,11 @@ def main():
         and 'isEqualToString:@"https"' in app
         and 'isEqualToString:@"maps.google.com"' in app,
         "external URL forwarding must be restricted to HTTPS Google Maps URLs",
+        failures,
+    )
+    require(
+        '[[url path] isEqualToString:@"/maps"]' in app,
+        "external URL forwarding must be restricted to the Google Maps route path",
         failures,
     )
     require(

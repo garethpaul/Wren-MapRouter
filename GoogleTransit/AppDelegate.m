@@ -214,7 +214,8 @@
 - (BOOL) isAllowedExternalURL:(NSURL *)url
 {
 	return [[url scheme] isEqualToString:@"https"] &&
-		[[url host] isEqualToString:@"maps.google.com"];
+		[[url host] isEqualToString:@"maps.google.com"] &&
+		[[url path] isEqualToString:@"/maps"];
 }
 
 - (void)locationManager:(CLLocationManager *)manager
