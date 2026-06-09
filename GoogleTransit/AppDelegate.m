@@ -169,8 +169,14 @@
 	[self fillCurrentLocationRouteEndpoints];
 
 	if (self.currentSource && self.currentDestination){
+		NSString *source = [self encodedRouteEndpoint:self.currentSource];
+		NSString *destination = [self encodedRouteEndpoint:self.currentDestination];
+		if (!source || !destination){
+			return;
+		}
+
 		NSString *directionsURLString = [NSString stringWithFormat:@"https://maps.google.com/maps?f=d&source=s_d&saddr=%@&daddr=%@&hl=en&vps=3&jsv=432b&vpsrc=0&gl=us&dirflg=r&ttype=now&noexp=0&noal=0&sort=def&mra=atm&ie=UTF8&ui=maps_mini",
-										 self.currentSource, self.currentDestination];
+										 source, destination];
 
 		NSURL *directionsURL = [NSURL URLWithString:directionsURLString];
 
@@ -178,6 +184,15 @@
 
 		[self openURL:directionsURL];
 	}
+}
+
+- (NSString *) encodedRouteEndpoint:(NSString *)endpoint
+{
+	if (!endpoint){
+		return nil;
+	}
+
+	return [endpoint stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 }
 
 - (void) openURL:(NSURL *)url

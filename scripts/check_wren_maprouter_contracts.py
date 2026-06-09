@@ -14,6 +14,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-08-maprouter-location-url-contracts.md",
     DOCS_PLANS / "2026-06-08-maprouter-transit-mode-scope.md",
     DOCS_PLANS / "2026-06-08-maprouter-external-url-allowlist.md",
+    DOCS_PLANS / "2026-06-09-maprouter-route-endpoint-encoding.md",
 ]
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
@@ -161,6 +162,19 @@ def main():
     require(
         "openTransitDirections" in app and "clearPendingRoute" in app,
         "route state must be cleared after forwarding or cancellation",
+        failures,
+    )
+    require(
+        "encodedRouteEndpoint" in app
+        and "stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding" in app,
+        "route endpoints must be URL-encoded before external forwarding",
+        failures,
+    )
+    require(
+        "NSString *source = [self encodedRouteEndpoint:self.currentSource]" in app
+        and "NSString *destination = [self encodedRouteEndpoint:self.currentDestination]" in app
+        and "source, destination" in app,
+        "Google Maps URL construction must use encoded route endpoints",
         failures,
     )
     require(DOCS_PLANS.is_dir(), "docs/plans must exist", failures)

@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-09
+
+- Encoded route source and destination endpoint strings before formatting the
+  Google Maps forwarding URL.
+- Added static checker coverage for route endpoint URL encoding.
+
 ## 2026-06-08
 
 - Restricted external forwarding to HTTPS Google Maps URLs before calling

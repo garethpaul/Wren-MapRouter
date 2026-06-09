@@ -18,13 +18,13 @@ Priority:
 - Keep current-location use visible and permission-aware
 - Treat Google Maps URL parameters as legacy assumptions
 - Restrict external forwarding to the documented Google Maps endpoint
+- Encode route endpoints before external URL forwarding
 - Avoid storing route or location history
 
 Next priorities:
 
 - Add README setup notes and expected route behavior
 - Document location permission requirements
-- Add route URL encoding tests
 - Decide whether the sample is archived or should target modern Maps APIs
 
 Contribution rules:
