@@ -2,6 +2,10 @@
 
 ## 2026-06-09
 
+- Cleared pending route state when a non-location directions request is missing
+  either endpoint.
+- Added static checker coverage for incomplete route cleanup before external
+  URL construction.
 - Escaped URL query delimiters when encoding route endpoints for Google Maps
   forwarding.
 - Added static checker coverage for delimiter-safe route endpoint encoding.

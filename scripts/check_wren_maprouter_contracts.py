@@ -18,6 +18,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-09-maprouter-query-delimiter-encoding.md",
     DOCS_PLANS / "2026-06-09-maprouter-external-path-allowlist.md",
     DOCS_PLANS / "2026-06-09-maprouter-encoding-failure-cleanup.md",
+    DOCS_PLANS / "2026-06-09-maprouter-incomplete-route-cleanup.md",
 ]
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
@@ -192,9 +193,31 @@ def main():
         "Google Maps URL construction must use encoded route endpoints",
         failures,
     )
+    encoding_failure_index = app.find("if (!source || !destination)")
+    encoding_cleanup_index = app.find("[self clearPendingRoute];", encoding_failure_index)
+    encoding_return_index = app.find("return;", encoding_cleanup_index)
+    url_string_index = app.find("NSString *directionsURLString", encoding_return_index)
     require(
-        "if (!source || !destination){\n\t\t\t[self clearPendingRoute];\n\t\t\treturn;\n\t\t}" in app,
+        encoding_failure_index != -1
+        and encoding_cleanup_index != -1
+        and encoding_return_index != -1
+        and url_string_index != -1
+        and encoding_failure_index < encoding_cleanup_index < encoding_return_index < url_string_index,
         "route state must be cleared when endpoint encoding fails",
+        failures,
+    )
+    incomplete_route_index = app.find("if (!self.currentSource || !self.currentDestination)")
+    wait_for_location_index = app.find("if (![self routeNeedsCurrentLocation])", incomplete_route_index)
+    incomplete_cleanup_index = app.find("[self clearPendingRoute];", wait_for_location_index)
+    incomplete_return_index = app.find("return;", incomplete_cleanup_index)
+    encode_source_index = app.find("NSString *source = [self encodedRouteEndpoint:self.currentSource]")
+    require(
+        incomplete_route_index != -1
+        and wait_for_location_index != -1
+        and incomplete_cleanup_index != -1
+        and incomplete_return_index != -1
+        and incomplete_route_index < wait_for_location_index < incomplete_cleanup_index < incomplete_return_index < encode_source_index,
+        "incomplete non-location routes must clear pending state before endpoint encoding",
         failures,
     )
     require(DOCS_PLANS.is_dir(), "docs/plans must exist", failures)

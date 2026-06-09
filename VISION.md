@@ -22,6 +22,7 @@ Priority:
 - Encode route endpoints before external URL forwarding
 - Escape route query delimiters in encoded endpoints
 - Clear pending route state when endpoint encoding fails
+- Clear incomplete non-location routes before external URL construction
 - Avoid storing route or location history
 
 Next priorities:
