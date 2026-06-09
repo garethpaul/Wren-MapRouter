@@ -172,6 +172,7 @@
 		NSString *source = [self encodedRouteEndpoint:self.currentSource];
 		NSString *destination = [self encodedRouteEndpoint:self.currentDestination];
 		if (!source || !destination){
+			[self clearPendingRoute];
 			return;
 		}
 

@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Cleared pending route state when route endpoint encoding fails before
+  external forwarding.
+- Added static checker coverage for encoding-failure cleanup.
 - Restricted external Google Maps forwarding to the expected `/maps` route
   path in addition to HTTPS host allowlisting.
 - Added static checker coverage for the external URL path allowlist.
