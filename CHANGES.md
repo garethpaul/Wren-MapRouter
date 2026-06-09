@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Escaped URL query delimiters when encoding route endpoints for Google Maps
+  forwarding.
+- Added static checker coverage for delimiter-safe route endpoint encoding.
 - Cleared pending route state when route endpoint encoding fails before
   external forwarding.
 - Added static checker coverage for encoding-failure cleanup.

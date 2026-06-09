@@ -20,6 +20,7 @@ Priority:
 - Restrict external forwarding to the documented Google Maps endpoint
 - Restrict external forwarding to the expected Google Maps route path
 - Encode route endpoints before external URL forwarding
+- Escape route query delimiters in encoded endpoints
 - Clear pending route state when endpoint encoding fails
 - Avoid storing route or location history
 

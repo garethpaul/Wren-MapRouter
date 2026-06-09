@@ -193,7 +193,12 @@
 		return nil;
 	}
 
-	return [endpoint stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	CFStringRef encodedEndpoint = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
+																		  (__bridge CFStringRef)endpoint,
+																		  NULL,
+																		  CFSTR(":/?#[]@!$&'()*+,;="),
+																		  kCFStringEncodingUTF8);
+	return CFBridgingRelease(encodedEndpoint);
 }
 
 - (void) openURL:(NSURL *)url

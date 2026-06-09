@@ -15,6 +15,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-08-maprouter-transit-mode-scope.md",
     DOCS_PLANS / "2026-06-08-maprouter-external-url-allowlist.md",
     DOCS_PLANS / "2026-06-09-maprouter-route-endpoint-encoding.md",
+    DOCS_PLANS / "2026-06-09-maprouter-query-delimiter-encoding.md",
     DOCS_PLANS / "2026-06-09-maprouter-external-path-allowlist.md",
     DOCS_PLANS / "2026-06-09-maprouter-encoding-failure-cleanup.md",
 ]
@@ -173,8 +174,15 @@ def main():
     )
     require(
         "encodedRouteEndpoint" in app
-        and "stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding" in app,
-        "route endpoints must be URL-encoded before external forwarding",
+        and "CFURLCreateStringByAddingPercentEscapes" in app
+        and ":/?#[]@!$&'()*+,;=" in app
+        and "stringByAddingPercentEscapesUsingEncoding" not in app,
+        "route endpoints must escape URL query delimiters before external forwarding",
+        failures,
+    )
+    require(
+        "CFBridgingRelease(encodedEndpoint)" in app,
+        "route endpoint encoder must transfer its CoreFoundation string under ARC",
         failures,
     )
     require(
