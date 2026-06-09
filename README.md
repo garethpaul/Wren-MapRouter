@@ -51,7 +51,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
   URL forwarding host/path allowlists, route endpoint encoding, query delimiter
   escaping, cleanup on encoding failure, and incomplete non-location route
-  cleanup, empty endpoint rejection, plus invalid location-update cleanup
+  cleanup, empty and whitespace-only endpoint rejection, plus invalid
+  location-update cleanup
 - Completed maintenance plans live under `docs/plans` and are checked by
   `make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
@@ -62,6 +63,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 - The app uses current location only to resolve a Maps directions endpoint that explicitly uses Current Location. Do not add route or location persistence without a privacy plan.
+- Route endpoints are trimmed before encoding so whitespace-only endpoints are
+  not forwarded to external maps.
 
 ## Security and Privacy Notes
 
@@ -94,6 +97,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   cleanup when a non-location route cannot resolve both endpoints.
 - See `docs/plans/2026-06-09-maprouter-location-update-validation.md` for
   cleanup when CoreLocation returns no location or an invalid coordinate.
+- See `docs/plans/2026-06-09-maprouter-whitespace-endpoint-guard.md` for
+  trimming route endpoints before empty checks and external URL forwarding.
 
 ## Contributing
 

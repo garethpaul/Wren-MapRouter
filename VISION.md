@@ -20,6 +20,7 @@ Priority:
 - Restrict external forwarding to the documented Google Maps endpoint
 - Restrict external forwarding to the expected Google Maps route path
 - Reject empty route endpoints before external forwarding
+- Reject whitespace-only route endpoints before external forwarding
 - Encode route endpoints before external URL forwarding
 - Escape route query delimiters in encoded endpoints
 - Clear pending route state when endpoint encoding fails
@@ -38,6 +39,7 @@ Contribution rules:
 - One PR = one focused routing, location, URL, project, or documentation change.
 - Do not commit user route or location data.
 - Keep external map destinations explicit.
+- Keep route endpoint normalization explicit before external forwarding.
 - Include simulator/device notes for route handling changes.
 
 ## Security And Responsible Use

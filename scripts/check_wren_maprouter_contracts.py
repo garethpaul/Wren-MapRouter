@@ -21,6 +21,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-09-maprouter-incomplete-route-cleanup.md",
     DOCS_PLANS / "2026-06-09-maprouter-location-update-validation.md",
     DOCS_PLANS / "2026-06-09-maprouter-empty-endpoint-guard.md",
+    DOCS_PLANS / "2026-06-09-maprouter-whitespace-endpoint-guard.md",
 ]
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
@@ -183,7 +184,10 @@ def main():
         "route endpoints must escape URL query delimiters before external forwarding",
         failures,
     )
-    empty_endpoint_index = app.find("if ([endpoint length] == 0)")
+    trim_endpoint_index = app.find(
+        "NSString *trimmedEndpoint = [endpoint stringByTrimmingCharactersInSet:"
+    )
+    empty_endpoint_index = app.find("if ([trimmedEndpoint length] == 0)", trim_endpoint_index)
     encoding_call_index = app.find("CFURLCreateStringByAddingPercentEscapes")
     require(
         empty_endpoint_index != -1
@@ -191,6 +195,15 @@ def main():
         and app.find("return nil;", empty_endpoint_index) < encoding_call_index
         and empty_endpoint_index < encoding_call_index,
         "route endpoint encoder must reject empty strings before percent encoding",
+        failures,
+    )
+    require(
+        trim_endpoint_index != -1
+        and "whitespaceAndNewlineCharacterSet" in app
+        and "(__bridge CFStringRef)trimmedEndpoint" in app
+        and "(__bridge CFStringRef)endpoint" not in app
+        and trim_endpoint_index < empty_endpoint_index < encoding_call_index,
+        "route endpoint encoder must trim whitespace before empty checks and percent encoding",
         failures,
     )
     require(

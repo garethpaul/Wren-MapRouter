@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Trimmed route endpoints before empty checks and percent encoding so
+  whitespace-only values cannot be forwarded.
+- Added static checker coverage for endpoint whitespace normalization.
 - Rejected empty route endpoints before percent encoding and external Google
   Maps URL construction.
 - Added static checker coverage for empty route endpoint rejection.

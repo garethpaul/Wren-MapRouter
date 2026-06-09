@@ -198,12 +198,13 @@
 		return nil;
 	}
 
-	if ([endpoint length] == 0){
+	NSString *trimmedEndpoint = [endpoint stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	if ([trimmedEndpoint length] == 0){
 		return nil;
 	}
 
 	CFStringRef encodedEndpoint = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
-																		  (__bridge CFStringRef)endpoint,
+																		  (__bridge CFStringRef)trimmedEndpoint,
 																		  NULL,
 																		  CFSTR(":/?#[]@!$&'()*+,;="),
 																		  kCFStringEncodingUTF8);
