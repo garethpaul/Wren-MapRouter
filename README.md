@@ -48,6 +48,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
 - `make verify` - checks Maps directions registration, location permission metadata, GeoJSON validity, route parsing guards, and external URL forwarding
+- Completed maintenance plans live under `docs/plans` and are checked by
+  `make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -68,6 +70,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - This looks like an Apple platform project or sample. Xcode, Swift, CocoaPods, and deployment target versions may need to match the original project era.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
+- See `docs/plans/2026-06-08-maprouter-location-url-contracts.md` for the
+  current location and URL-routing baseline.
 
 ## Contributing
 

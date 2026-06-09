@@ -8,6 +8,8 @@ execution: code
 
 # Wren MapRouter Location And URL Contracts
 
+Status: Completed
+
 ## Problem Frame
 
 The sample starts CoreLocation updates whenever the app becomes active, but its

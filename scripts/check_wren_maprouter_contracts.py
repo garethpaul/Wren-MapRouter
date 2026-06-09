@@ -9,6 +9,8 @@ import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
+DOCS_PLANS = ROOT / "docs/plans"
+CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-maprouter-location-url-contracts.md"
 
 
 def read_text(relative_path):
@@ -43,6 +45,7 @@ def main():
 
     app = read_text("GoogleTransit/AppDelegate.m")
     plist = read_plist("GoogleTransit/GoogleTransit-Info.plist", failures)
+    plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.is_dir() else []
 
     try:
         geojson = json.loads(read_text("GoogleTransit/Directions.geojson"))
@@ -130,6 +133,16 @@ def main():
         "route state must be cleared after forwarding or cancellation",
         failures,
     )
+    require(DOCS_PLANS.is_dir(), "docs/plans must exist", failures)
+    require(CANONICAL_PLAN in plans, f"{CANONICAL_PLAN.relative_to(ROOT)} must be present", failures)
+    for plan in plans:
+        text = plan.read_text(encoding="utf-8")
+        require(
+            "status: completed" in text.lower() or "Status: Completed" in text,
+            f"{plan.relative_to(ROOT)} must be completed",
+            failures,
+        )
+        require("make check" in text, f"{plan.relative_to(ROOT)} must document make check verification", failures)
 
     if failures:
         print("Wren MapRouter contract check failed:")
