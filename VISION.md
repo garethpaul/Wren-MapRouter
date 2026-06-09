@@ -19,6 +19,7 @@ Priority:
 - Treat Google Maps URL parameters as legacy assumptions
 - Restrict external forwarding to the documented Google Maps endpoint
 - Restrict external forwarding to the expected Google Maps route path
+- Reject empty route endpoints before external forwarding
 - Encode route endpoints before external URL forwarding
 - Escape route query delimiters in encoded endpoints
 - Clear pending route state when endpoint encoding fails

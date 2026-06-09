@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Rejected empty route endpoints before percent encoding and external Google
+  Maps URL construction.
+- Added static checker coverage for empty route endpoint rejection.
 - Cleared pending route state when CoreLocation returns no location or an
   invalid coordinate update.
 - Added static checker coverage for location update validation.

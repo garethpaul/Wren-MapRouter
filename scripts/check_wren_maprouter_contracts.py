@@ -20,6 +20,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-09-maprouter-encoding-failure-cleanup.md",
     DOCS_PLANS / "2026-06-09-maprouter-incomplete-route-cleanup.md",
     DOCS_PLANS / "2026-06-09-maprouter-location-update-validation.md",
+    DOCS_PLANS / "2026-06-09-maprouter-empty-endpoint-guard.md",
 ]
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
@@ -180,6 +181,16 @@ def main():
         and ":/?#[]@!$&'()*+,;=" in app
         and "stringByAddingPercentEscapesUsingEncoding" not in app,
         "route endpoints must escape URL query delimiters before external forwarding",
+        failures,
+    )
+    empty_endpoint_index = app.find("if ([endpoint length] == 0)")
+    encoding_call_index = app.find("CFURLCreateStringByAddingPercentEscapes")
+    require(
+        empty_endpoint_index != -1
+        and encoding_call_index != -1
+        and app.find("return nil;", empty_endpoint_index) < encoding_call_index
+        and empty_endpoint_index < encoding_call_index,
+        "route endpoint encoder must reject empty strings before percent encoding",
         failures,
     )
     require(
