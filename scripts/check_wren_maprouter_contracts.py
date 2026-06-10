@@ -22,7 +22,9 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-09-maprouter-location-update-validation.md",
     DOCS_PLANS / "2026-06-09-maprouter-empty-endpoint-guard.md",
     DOCS_PLANS / "2026-06-09-maprouter-whitespace-endpoint-guard.md",
+    DOCS_PLANS / "2026-06-10-maprouter-hosted-static-verification.md",
 ]
+WORKFLOW = ROOT / ".github/workflows/check.yml"
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
     "MKDirectionsModeFerry",
@@ -64,6 +66,7 @@ def main():
 
     app = read_text("GoogleTransit/AppDelegate.m")
     plist = read_plist("GoogleTransit/GoogleTransit-Info.plist", failures)
+    workflow = read_text(".github/workflows/check.yml") if WORKFLOW.is_file() else ""
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.is_dir() else []
 
     try:
@@ -269,6 +272,29 @@ def main():
         "location updates must not store unvalidated latest locations",
         failures,
     )
+    require(WORKFLOW.is_file(), "hosted verification workflow must exist", failures)
+    require(
+        "permissions:\n  contents: read" in workflow,
+        "hosted verification permissions must be read-only",
+        failures,
+    )
+    require(
+        "python-version: ['3.10', '3.12']" in workflow,
+        "hosted verification must cover Python 3.10 and 3.12",
+        failures,
+    )
+    require(
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" in workflow,
+        "checkout must use an immutable revision",
+        failures,
+    )
+    require(
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405" in workflow,
+        "setup-python must use an immutable revision",
+        failures,
+    )
+    require("timeout-minutes: 5" in workflow, "hosted verification must have a timeout", failures)
+    require("run: make check" in workflow, "hosted verification must run make check", failures)
     require(DOCS_PLANS.is_dir(), "docs/plans must exist", failures)
     for plan in CANONICAL_PLANS:
         require(plan in plans, f"{plan.relative_to(ROOT)} must be present", failures)

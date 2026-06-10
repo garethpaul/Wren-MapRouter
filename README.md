@@ -47,6 +47,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Testing and Verification
 
 - `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
+- GitHub Actions runs the portable gate on Python 3.10 and 3.12 with read-only
+  permissions; Linux runners intentionally skip the Xcode build.
 - `make verify` - checks Maps directions registration, location permission
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
   URL forwarding host/path allowlists, route endpoint encoding, query delimiter
@@ -99,6 +101,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   cleanup when CoreLocation returns no location or an invalid coordinate.
 - See `docs/plans/2026-06-09-maprouter-whitespace-endpoint-guard.md` for
   trimming route endpoints before empty checks and external URL forwarding.
+- See `docs/plans/2026-06-10-maprouter-hosted-static-verification.md` for the
+  pinned, least-privilege hosted contract baseline.
 
 ## Contributing
 
