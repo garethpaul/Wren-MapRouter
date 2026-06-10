@@ -48,14 +48,15 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
 - GitHub Actions runs the portable gate on Python 3.10, 3.12, and 3.14 with
-  read-only permissions and manual dispatch; Linux runners intentionally skip
-  the Xcode build pending the Objective-C and deployment-target migration.
+  fixed Ubuntu 24.04 runners, read-only permissions, superseded-run
+  cancellation, and manual dispatch; Linux runners intentionally skip the
+  Xcode build pending the Objective-C and deployment-target migration.
 - `make verify` - checks Maps directions registration, location permission
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
   URL forwarding host/path allowlists, route endpoint encoding, query delimiter
   escaping, cleanup on encoding failure, and incomplete non-location route
   cleanup, empty and whitespace-only endpoint rejection, plus invalid
-  location-update cleanup
+  location-update cleanup and cached-location freshness rejection
 - Completed maintenance plans live under `docs/plans` and are checked by
   `make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
@@ -66,6 +67,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 - The app uses current location only to resolve a Maps directions endpoint that explicitly uses Current Location. Do not add route or location persistence without a privacy plan.
+- Future-dated and older-than-60-second cached locations are ignored while the
+  router waits for a fresh coordinate.
 - Route endpoints are trimmed before encoding so whitespace-only endpoints are
   not forwarded to external maps.
 
@@ -104,6 +107,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   trimming route endpoints before empty checks and external URL forwarding.
 - See `docs/plans/2026-06-10-maprouter-hosted-static-verification.md` for the
   pinned, least-privilege hosted contract baseline.
+- See `docs/plans/2026-06-10-maprouter-location-freshness.md` for cached
+  location rejection and root-independent verification.
 
 ## Contributing
 

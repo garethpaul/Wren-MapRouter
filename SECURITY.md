@@ -38,6 +38,9 @@ Route forwarding should reject missing or empty route endpoints before building
 external Google Maps URLs, and should keep route/location state cleanup visible
 when forwarding cannot proceed.
 
+Current-location routing should ignore future-dated or stale cached samples and
+wait for a fresh coordinate before forwarding externally.
+
 ## Dependency and Supply Chain Security
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.

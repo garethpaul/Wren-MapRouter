@@ -23,8 +23,10 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-09-maprouter-empty-endpoint-guard.md",
     DOCS_PLANS / "2026-06-09-maprouter-whitespace-endpoint-guard.md",
     DOCS_PLANS / "2026-06-10-maprouter-hosted-static-verification.md",
+    DOCS_PLANS / "2026-06-10-maprouter-location-freshness.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
+MAKEFILE = ROOT / "Makefile"
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
     "MKDirectionsModeFerry",
@@ -272,6 +274,18 @@ def main():
         "location updates must not store unvalidated latest locations",
         failures,
     )
+    freshness_index = app.find("NSTimeInterval locationAge = -[latestLocation.timestamp timeIntervalSinceNow];")
+    stale_guard_index = app.find("if (locationAge < 0 || locationAge > 60)", freshness_index)
+    stale_return_index = app.find("return;", stale_guard_index)
+    require(
+        freshness_index != -1
+        and stale_guard_index != -1
+        and stale_return_index != -1
+        and assign_location_index != -1
+        and freshness_index < stale_guard_index < stale_return_index < assign_location_index,
+        "location updates must ignore future-dated and stale cached coordinates before storing them",
+        failures,
+    )
     require(WORKFLOW.is_file(), "hosted verification workflow must exist", failures)
     require(
         "permissions:\n  contents: read" in workflow,
@@ -300,6 +314,35 @@ def main():
     )
     require("timeout-minutes: 5" in workflow, "hosted verification must have a timeout", failures)
     require("run: make check" in workflow, "hosted verification must run make check", failures)
+    require("concurrency:" in workflow, "hosted verification must define concurrency", failures)
+    require(
+        "cancel-in-progress: true" in workflow,
+        "hosted verification must cancel superseded runs",
+        failures,
+    )
+    require(
+        "runs-on: ubuntu-24.04" in workflow,
+        "hosted verification must use a fixed Ubuntu runner",
+        failures,
+    )
+    require("ubuntu-latest" not in workflow, "hosted verification must not use a floating runner", failures)
+    makefile = MAKEFILE.read_text(encoding="utf-8")
+    require(
+        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))" in makefile,
+        "Makefile must resolve the repository root",
+        failures,
+    )
+    require(
+        "CHECK_SCRIPT := $(ROOT)/scripts/check_wren_maprouter_contracts.py" in makefile,
+        "Makefile must use the rooted checker path",
+        failures,
+    )
+    require(
+        "PROJECT := $(ROOT)/GoogleTransit.xcodeproj" in makefile
+        and '-project "$(PROJECT)"' in makefile,
+        "optional Xcode build must use the rooted project path",
+        failures,
+    )
     require(DOCS_PLANS.is_dir(), "docs/plans must exist", failures)
     for plan in CANONICAL_PLANS:
         require(plan in plans, f"{plan.relative_to(ROOT)} must be present", failures)

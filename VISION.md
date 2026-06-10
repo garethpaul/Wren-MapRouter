@@ -26,6 +26,7 @@ Priority:
 - Clear pending route state when endpoint encoding fails
 - Clear incomplete non-location routes before external URL construction
 - Clear pending routes when CoreLocation updates are missing or invalid
+- Ignore future-dated and stale cached coordinates before route forwarding
 - Avoid storing route or location history
 - Keep portable location and external-forwarding contracts running in hosted CI
 

@@ -243,6 +243,11 @@
 		return;
 	}
 
+	NSTimeInterval locationAge = -[latestLocation.timestamp timeIntervalSinceNow];
+	if (locationAge < 0 || locationAge > 60){
+		return;
+	}
+
 	self.currentLocation = latestLocation;
 	[self openTransitDirections];
 }

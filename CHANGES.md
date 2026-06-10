@@ -8,6 +8,10 @@
 - Added static protection for workflow permissions, action revisions, matrix
   versions, timeout, and the `make check` entry point.
 - Documented that hosted Linux checks intentionally skip the legacy Xcode build.
+- Rejected future-dated and older-than-60-second CoreLocation samples before
+  using current location in an external route.
+- Pinned hosted verification to Ubuntu 24.04 with superseded-run cancellation
+  and made static and optional Xcode checks root-independent.
 
 ## 2026-06-09
 
