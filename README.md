@@ -47,8 +47,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Testing and Verification
 
 - `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
-- GitHub Actions runs the portable gate on Python 3.10 and 3.12 with read-only
-  permissions; Linux runners intentionally skip the Xcode build.
+- GitHub Actions runs the portable gate on Python 3.10, 3.12, and 3.14 with
+  read-only permissions and manual dispatch; Linux runners intentionally skip
+  the Xcode build pending the Objective-C and deployment-target migration.
 - `make verify` - checks Maps directions registration, location permission
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
   URL forwarding host/path allowlists, route endpoint encoding, query delimiter

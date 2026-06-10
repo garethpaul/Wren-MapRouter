@@ -2,8 +2,9 @@
 
 ## 2026-06-10
 
-- Added immutable, read-only GitHub Actions verification on Python 3.10 and
-  3.12 for location, route normalization, and external forwarding contracts.
+- Added immutable, read-only GitHub Actions verification on Python 3.10, 3.12,
+  and 3.14 for location, route normalization, and external forwarding
+  contracts, with manual dispatch for maintenance runs.
 - Added static protection for workflow permissions, action revisions, matrix
   versions, timeout, and the `make check` entry point.
 - Documented that hosted Linux checks intentionally skip the legacy Xcode build.

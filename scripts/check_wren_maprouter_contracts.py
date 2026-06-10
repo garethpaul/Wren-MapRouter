@@ -279,8 +279,13 @@ def main():
         failures,
     )
     require(
-        "python-version: ['3.10', '3.12']" in workflow,
-        "hosted verification must cover Python 3.10 and 3.12",
+        "python-version: ['3.10', '3.12', '3.14']" in workflow,
+        "hosted verification must cover Python 3.10, 3.12, and 3.14",
+        failures,
+    )
+    require(
+        "workflow_dispatch:" in workflow,
+        "hosted verification must support manual dispatch",
         failures,
     )
     require(

@@ -10,7 +10,8 @@ legacy iOS binary.
 
 ## Changes
 
-- Add a read-only GitHub Actions workflow on Python 3.10 and 3.12.
+- Add a read-only GitHub Actions workflow on Python 3.10, 3.12, and 3.14.
+- Support manual dispatch for maintenance verification.
 - Pin checkout and setup-python to immutable revisions.
 - Bound matrix jobs with a five-minute timeout.
 - Run `make check`, which executes the portable contracts and explicitly skips
@@ -21,3 +22,10 @@ legacy iOS binary.
 
 - `python3 -m py_compile scripts/check_wren_maprouter_contracts.py`
 - `make check`
+
+## Follow-up Boundary
+
+Current Xcode validation should follow a dedicated migration of the pre-ARC
+Objective-C project, deployment target, and deprecated external Maps handoff
+APIs. The Linux workflow intentionally protects route and privacy contracts
+without claiming that the historical application binary still compiles.
