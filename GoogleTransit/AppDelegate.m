@@ -129,6 +129,9 @@
 	if (!location){
 		return nil;
 	}
+	if (location.horizontalAccuracy < 0){
+		return nil;
+	}
 
 	CLLocationCoordinate2D coordinate = location.coordinate;
 	if (!CLLocationCoordinate2DIsValid(coordinate)){
@@ -238,7 +241,9 @@
 	 didUpdateLocations:(NSArray *)locations
 {
 	CLLocation *latestLocation = [locations lastObject];
-	if (!latestLocation || !CLLocationCoordinate2DIsValid(latestLocation.coordinate)){
+	if (!latestLocation ||
+		!CLLocationCoordinate2DIsValid(latestLocation.coordinate) ||
+		latestLocation.horizontalAccuracy < 0){
 		[self clearPendingRoute];
 		return;
 	}

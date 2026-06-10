@@ -24,6 +24,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-09-maprouter-whitespace-endpoint-guard.md",
     DOCS_PLANS / "2026-06-10-maprouter-hosted-static-verification.md",
     DOCS_PLANS / "2026-06-10-maprouter-location-freshness.md",
+    DOCS_PLANS / "2026-06-10-maprouter-horizontal-accuracy-validation.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -251,22 +252,46 @@ def main():
         failures,
     )
     location_update_index = app.find("didUpdateLocations")
-    latest_location_index = app.find("CLLocation *latestLocation = [locations lastObject];", location_update_index)
-    invalid_location_index = app.find(
-        "if (!latestLocation || !CLLocationCoordinate2DIsValid(latestLocation.coordinate))",
-        latest_location_index,
+    coordinate_method_index = app.find("- (NSString *) coordinateStringForLocation:(CLLocation *)location")
+    coordinate_accuracy_index = app.find("if (location.horizontalAccuracy < 0)", coordinate_method_index)
+    coordinate_value_index = app.find("CLLocationCoordinate2D coordinate = location.coordinate;", coordinate_method_index)
+    require(
+        coordinate_method_index != -1
+        and coordinate_accuracy_index != -1
+        and coordinate_value_index != -1
+        and coordinate_method_index < coordinate_accuracy_index < coordinate_value_index,
+        "route endpoint conversion must reject locations with invalid horizontal accuracy",
+        failures,
     )
+    latest_location_index = app.find("CLLocation *latestLocation = [locations lastObject];", location_update_index)
+    invalid_location_index = app.find("if (!latestLocation", latest_location_index)
+    invalid_coordinate_index = app.find(
+        "!CLLocationCoordinate2DIsValid(latestLocation.coordinate)", invalid_location_index
+    )
+    update_accuracy_index = app.find("latestLocation.horizontalAccuracy < 0", invalid_location_index)
     invalid_cleanup_index = app.find("[self clearPendingRoute];", invalid_location_index)
     invalid_return_index = app.find("return;", invalid_cleanup_index)
     assign_location_index = app.find("self.currentLocation = latestLocation;", invalid_return_index)
     require(
         latest_location_index != -1
         and invalid_location_index != -1
+        and invalid_coordinate_index != -1
         and invalid_cleanup_index != -1
         and invalid_return_index != -1
         and assign_location_index != -1
-        and latest_location_index < invalid_location_index < invalid_cleanup_index < invalid_return_index < assign_location_index,
+        and latest_location_index
+        < invalid_location_index
+        < invalid_coordinate_index
+        < invalid_cleanup_index
+        < invalid_return_index
+        < assign_location_index,
         "location updates must clear pending routes before storing missing or invalid coordinates",
+        failures,
+    )
+    require(
+        update_accuracy_index != -1
+        and invalid_coordinate_index < update_accuracy_index < invalid_cleanup_index,
+        "location updates must reject negative horizontal accuracy before cleanup and storage",
         failures,
     )
     require(

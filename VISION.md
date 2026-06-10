@@ -27,6 +27,7 @@ Priority:
 - Clear incomplete non-location routes before external URL construction
 - Clear pending routes when CoreLocation updates are missing or invalid
 - Ignore future-dated and stale cached coordinates before route forwarding
+- Reject locations whose horizontal accuracy marks their coordinates invalid
 - Avoid storing route or location history
 - Keep portable location and external-forwarding contracts running in hosted CI
 

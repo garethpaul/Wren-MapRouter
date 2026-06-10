@@ -56,7 +56,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   URL forwarding host/path allowlists, route endpoint encoding, query delimiter
   escaping, cleanup on encoding failure, and incomplete non-location route
   cleanup, empty and whitespace-only endpoint rejection, plus invalid
-  location-update cleanup and cached-location freshness rejection
+  location-update cleanup, negative horizontal-accuracy rejection, and
+  cached-location freshness rejection
 - Completed maintenance plans live under `docs/plans` and are checked by
   `make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
@@ -69,6 +70,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - The app uses current location only to resolve a Maps directions endpoint that explicitly uses Current Location. Do not add route or location persistence without a privacy plan.
 - Future-dated and older-than-60-second cached locations are ignored while the
   router waits for a fresh coordinate.
+- Locations with negative horizontal accuracy are rejected because Core
+  Location marks their latitude and longitude invalid.
 - Route endpoints are trimmed before encoding so whitespace-only endpoints are
   not forwarded to external maps.
 
@@ -109,6 +112,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   pinned, least-privilege hosted contract baseline.
 - See `docs/plans/2026-06-10-maprouter-location-freshness.md` for cached
   location rejection and root-independent verification.
+- See `docs/plans/2026-06-10-maprouter-horizontal-accuracy-validation.md` for
+  rejecting Core Location samples whose coordinates are marked invalid.
 
 ## Contributing
 

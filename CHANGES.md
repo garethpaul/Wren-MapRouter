@@ -2,6 +2,9 @@
 
 ## 2026-06-10
 
+- Rejected Core Location objects with negative horizontal accuracy before
+  route endpoint conversion or live-location storage, with cleanup and static
+  regression coverage.
 - Added immutable, read-only GitHub Actions verification on Python 3.10, 3.12,
   and 3.14 for location, route normalization, and external forwarding
   contracts, with manual dispatch for maintenance runs.
