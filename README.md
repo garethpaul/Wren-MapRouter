@@ -56,6 +56,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   fixed Ubuntu 24.04 runners, read-only permissions, superseded-run
   cancellation, and manual dispatch; Linux runners intentionally skip the
   Xcode build pending the Objective-C and deployment-target migration.
+  Checkout credentials are not persisted after source retrieval.
 - `make verify` - checks Maps directions registration, location permission
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
   URL forwarding host/path allowlists, route endpoint encoding, query delimiter

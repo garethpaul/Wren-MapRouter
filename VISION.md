@@ -30,6 +30,7 @@ Priority:
 - Reject locations whose horizontal accuracy marks their coordinates invalid
 - Avoid storing route or location history
 - Keep portable location and external-forwarding contracts running in hosted CI
+- Keep hosted source retrieval credential-free after checkout
 
 Next priorities:
 

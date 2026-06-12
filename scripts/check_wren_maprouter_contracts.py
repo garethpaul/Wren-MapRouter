@@ -25,6 +25,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-10-maprouter-hosted-static-verification.md",
     DOCS_PLANS / "2026-06-10-maprouter-location-freshness.md",
     DOCS_PLANS / "2026-06-10-maprouter-horizontal-accuracy-validation.md",
+    DOCS_PLANS / "2026-06-12-checkout-credential-boundary.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -351,6 +352,50 @@ def main():
         failures,
     )
     require("ubuntu-latest" not in workflow, "hosted verification must not use a floating runner", failures)
+    workflow_files = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in WORKFLOW.parent.iterdir()
+        if path.is_file()
+    )
+    checkout_step = (
+        "      - name: Check out repository\n"
+        "        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3\n"
+        "        with:\n"
+        "          persist-credentials: false"
+    )
+    require(
+        workflow_files == [".github/workflows/check.yml"],
+        "workflow inventory must contain only .github/workflows/check.yml",
+        failures,
+    )
+    require(
+        workflow.count("actions/checkout@") == 1 and checkout_step in workflow,
+        "hosted verification must use one pinned credential-free checkout",
+        failures,
+    )
+    require(
+        workflow.count("persist-credentials:") == 1
+        and "persist-credentials: true" not in workflow,
+        "hosted verification must not persist checkout credentials",
+        failures,
+    )
+    checkout_plan = read_text("docs/plans/2026-06-12-checkout-credential-boundary.md")
+    require(
+        "status: completed" in checkout_plan.lower()
+        and "persist-credentials: false" in checkout_plan
+        and "hostile mutations rejected" in checkout_plan,
+        "checkout credential plan must record completed verification",
+        failures,
+    )
+    guidance = " ".join(
+        "\n".join(read_text(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()
+    ).lower()
+    require(
+        "checkout credentials are not persisted" in guidance
+        and "credential-free checkout" in guidance,
+        "repository guidance must document the credential-free checkout boundary",
+        failures,
+    )
     makefile = MAKEFILE.read_text(encoding="utf-8")
     require(
         "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))" in makefile,
