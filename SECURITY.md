@@ -40,6 +40,9 @@ when forwarding cannot proceed.
 
 Current-location routing should ignore future-dated or stale cached samples and
 wait for a fresh coordinate before forwarding externally.
+Unusable individual samples should also preserve the pending route while Core
+Location continues updating; terminal authorization, lifecycle, and delegate
+failures must still clear route and location state.
 
 ## Dependency and Supply Chain Security
 

@@ -244,7 +244,6 @@
 	if (!latestLocation ||
 		!CLLocationCoordinate2DIsValid(latestLocation.coordinate) ||
 		latestLocation.horizontalAccuracy < 0){
-		[self clearPendingRoute];
 		return;
 	}
 

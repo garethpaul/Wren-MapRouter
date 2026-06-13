@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-13
+
+- Preserved pending Current Location routes when Core Location emits a missing,
+  invalid-coordinate, or negative-accuracy sample while awaiting later data.
+
 ## 2026-06-12
 
 - Disabled persisted checkout credentials and enforced the sole pinned

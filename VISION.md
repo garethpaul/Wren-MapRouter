@@ -25,7 +25,7 @@ Priority:
 - Escape route query delimiters in encoded endpoints
 - Clear pending route state when endpoint encoding fails
 - Clear incomplete non-location routes before external URL construction
-- Clear pending routes when CoreLocation updates are missing or invalid
+- Ignore missing or invalid CoreLocation samples while awaiting usable data
 - Ignore future-dated and stale cached coordinates before route forwarding
 - Reject locations whose horizontal accuracy marks their coordinates invalid
 - Avoid storing route or location history

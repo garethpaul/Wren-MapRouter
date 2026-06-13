@@ -28,6 +28,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-12-checkout-credential-boundary.md",
     DOCS_PLANS / "2026-06-13-maprouter-transient-location-errors.md",
     DOCS_PLANS / "2026-06-13-maprouter-background-route-cleanup.md",
+    DOCS_PLANS / "2026-06-13-maprouter-transient-location-samples.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -272,29 +273,44 @@ def main():
         "!CLLocationCoordinate2DIsValid(latestLocation.coordinate)", invalid_location_index
     )
     update_accuracy_index = app.find("latestLocation.horizontalAccuracy < 0", invalid_location_index)
-    invalid_cleanup_index = app.find("[self clearPendingRoute];", invalid_location_index)
-    invalid_return_index = app.find("return;", invalid_cleanup_index)
+    invalid_return_index = app.find("return;", invalid_location_index)
+    location_age_index = app.find("NSTimeInterval locationAge", invalid_return_index)
     assign_location_index = app.find("self.currentLocation = latestLocation;", invalid_return_index)
     require(
         latest_location_index != -1
         and invalid_location_index != -1
         and invalid_coordinate_index != -1
-        and invalid_cleanup_index != -1
         and invalid_return_index != -1
+        and location_age_index != -1
         and assign_location_index != -1
         and latest_location_index
         < invalid_location_index
         < invalid_coordinate_index
-        < invalid_cleanup_index
         < invalid_return_index
+        < location_age_index
         < assign_location_index,
-        "location updates must clear pending routes before storing missing or invalid coordinates",
+        "unusable location samples must return before freshness checks and storage",
         failures,
     )
     require(
         update_accuracy_index != -1
-        and invalid_coordinate_index < update_accuracy_index < invalid_cleanup_index,
-        "location updates must reject negative horizontal accuracy before cleanup and storage",
+        and invalid_coordinate_index < update_accuracy_index < invalid_return_index,
+        "location updates must reject negative horizontal accuracy before returning",
+        failures,
+    )
+    invalid_sample_body = app[invalid_location_index:invalid_return_index]
+    require(
+        "clearPendingRoute" not in invalid_sample_body,
+        "transient unusable samples must preserve the pending route and active updates",
+        failures,
+    )
+    require(
+        "if (!latestLocation ||\n"
+        "\t\t!CLLocationCoordinate2DIsValid(latestLocation.coordinate) ||\n"
+        "\t\tlatestLocation.horizontalAccuracy < 0){\n"
+        "\t\treturn;\n"
+        "\t}" in app,
+        "unusable location samples must use an unconditional early return",
         failures,
     )
     require(

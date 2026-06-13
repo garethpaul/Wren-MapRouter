@@ -1,6 +1,6 @@
 # MapRouter Transient Location Samples
 
-Status: Planned
+Status: Completed
 
 ## Problem
 
@@ -36,3 +36,13 @@ same way as stale data: a later delegate update can still complete the route.
 - Do not persist route/location data, change freshness or accuracy thresholds,
   alter authorization prompts, or modify Google Maps URL construction.
 - Do not merge or close any pull request without explicit owner authorization.
+
+## Verification Results
+
+- Before this status update, the dependency-free checker passed all source and
+  documentation contracts and stopped only at the plan-completion requirement.
+- Local and external-working-directory `timeout 180s make check` passed the
+  portable contracts and explicitly skipped unavailable `xcodebuild`.
+- Eight isolated hostile mutations were rejected for premature cleanup,
+  missing or late return, missing coordinate or accuracy validation, removed
+  background or terminal delegate cleanup, and stale plan status.
