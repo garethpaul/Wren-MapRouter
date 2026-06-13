@@ -264,6 +264,11 @@
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
+	if ([[error domain] isEqualToString:kCLErrorDomain] &&
+		[error code] == kCLErrorLocationUnknown){
+		return;
+	}
+
 	[self clearPendingRoute];
 }
 

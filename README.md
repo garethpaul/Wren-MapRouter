@@ -63,7 +63,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   escaping, cleanup on encoding failure, and incomplete non-location route
   cleanup, empty and whitespace-only endpoint rejection, plus invalid
   location-update cleanup, negative horizontal-accuracy rejection, and
-  cached-location freshness rejection
+  cached-location freshness rejection, and transient Core Location error
+  preservation
 - Completed maintenance plans live under `docs/plans` and are checked by
   `make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
@@ -78,6 +79,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
   router waits for a fresh coordinate.
 - Locations with negative horizontal accuracy are rejected because Core
   Location marks their latitude and longitude invalid.
+- `kCLErrorLocationUnknown` keeps the pending Current Location route active so
+  Core Location can deliver a later coordinate; other delegate failures clear
+  route state and stop updates.
 - Route endpoints are trimmed before encoding so whitespace-only endpoints are
   not forwarded to external maps.
 
@@ -120,6 +124,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   location rejection and root-independent verification.
 - See `docs/plans/2026-06-10-maprouter-horizontal-accuracy-validation.md` for
   rejecting Core Location samples whose coordinates are marked invalid.
+- See `docs/plans/2026-06-13-maprouter-transient-location-errors.md` for
+  preserving pending routes across temporary location acquisition failures.
 
 ## Contributing
 

@@ -26,6 +26,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-10-maprouter-location-freshness.md",
     DOCS_PLANS / "2026-06-10-maprouter-horizontal-accuracy-validation.md",
     DOCS_PLANS / "2026-06-12-checkout-credential-boundary.md",
+    DOCS_PLANS / "2026-06-13-maprouter-transient-location-errors.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -298,6 +299,37 @@ def main():
     require(
         "self.currentLocation = [locations lastObject]" not in app,
         "location updates must not store unvalidated latest locations",
+        failures,
+    )
+    location_failure_match = re.search(
+        r"- \(void\)locationManager:\(CLLocationManager \*\)manager "
+        r"didFailWithError:\(NSError \*\)error\s*\{(?P<body>.*?)\n\}",
+        app,
+        re.S,
+    )
+    location_failure_body = location_failure_match.group("body") if location_failure_match else ""
+    transient_domain_index = location_failure_body.find(
+        "[[error domain] isEqualToString:kCLErrorDomain]"
+    )
+    transient_code_index = location_failure_body.find(
+        "[error code] == kCLErrorLocationUnknown", transient_domain_index
+    )
+    transient_return_index = location_failure_body.find("return;", transient_code_index)
+    terminal_cleanup_index = location_failure_body.find(
+        "[self clearPendingRoute];", transient_return_index
+    )
+    require(
+        location_failure_match is not None
+        and transient_domain_index != -1
+        and transient_code_index != -1
+        and transient_return_index != -1
+        and terminal_cleanup_index != -1
+        and location_failure_body.count("[self clearPendingRoute];") == 1
+        and transient_domain_index
+        < transient_code_index
+        < transient_return_index
+        < terminal_cleanup_index,
+        "transient Core Location failures must preserve pending routes before terminal cleanup",
         failures,
     )
     freshness_index = app.find("NSTimeInterval locationAge = -[latestLocation.timestamp timeIntervalSinceNow];")
