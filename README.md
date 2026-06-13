@@ -126,6 +126,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
   rejecting Core Location samples whose coordinates are marked invalid.
 - See `docs/plans/2026-06-13-maprouter-transient-location-errors.md` for
   preserving pending routes across temporary location acquisition failures.
+- See `docs/plans/2026-06-13-maprouter-background-route-cleanup.md` for
+  preserving routes during temporary inactive states and clearing on
+  background entry.
 
 ## Contributing
 

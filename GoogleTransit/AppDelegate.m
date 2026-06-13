@@ -41,7 +41,7 @@
 	[self startLocationUpdatesIfNeeded];
 }
 
-- (void) applicationWillResignActive:(UIApplication *)application
+- (void) applicationDidEnterBackground:(UIApplication *)application
 {
 	[self clearPendingRoute];
 }

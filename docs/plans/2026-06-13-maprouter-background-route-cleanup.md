@@ -1,6 +1,6 @@
 # MapRouter Background Route Cleanup
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -18,15 +18,15 @@ Location is still resolving it.
   external URL allowlisting, and terminal cleanup behavior unchanged.
 - Add lifecycle-scoped static ordering contracts and hostile mutation coverage.
 
-## Verification Plan
+## Verification Completed
 
-- Run the portable checker and `make check` from the repository and an external
-  working directory.
-- Compile the Python checker and run `git diff --check`.
-- Reject mutations that restore resign-active cleanup, remove background
-  cleanup, misorder the lifecycle methods, omit the canonical plan, or leave
-  stale plan status.
-- Audit the exact diff for generated artifacts, vendored/project/workflow
-  changes, and credential-like additions.
-- Do not claim simulator, device, or current-SDK behavior when `xcodebuild` is
-  unavailable.
+- The portable checker and repository-local and external-directory
+  `make check` invocations passed.
+- Python checker compilation and `git diff --check` passed.
+- Six isolated hostile mutations were rejected: restored resign-active cleanup,
+  missing or duplicate background cleanup, late background cleanup, missing
+  canonical plan, and stale plan status.
+- Exact-base path, generated-artifact, and added-line secret-pattern scans
+  passed without vendored, project, lockfile, or workflow changes.
+- Both Make runs reported `xcodebuild` unavailable on this Linux host, so no
+  simulator, device, or current-SDK behavior is claimed.

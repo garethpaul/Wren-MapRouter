@@ -27,6 +27,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-10-maprouter-horizontal-accuracy-validation.md",
     DOCS_PLANS / "2026-06-12-checkout-credential-boundary.md",
     DOCS_PLANS / "2026-06-13-maprouter-transient-location-errors.md",
+    DOCS_PLANS / "2026-06-13-maprouter-background-route-cleanup.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -299,6 +300,34 @@ def main():
     require(
         "self.currentLocation = [locations lastObject]" not in app,
         "location updates must not store unvalidated latest locations",
+        failures,
+    )
+    resign_match = re.search(
+        r"- \(void\) applicationWillResignActive:\(UIApplication \*\)application"
+        r"\s*\{(?P<body>.*?)\n\}",
+        app,
+        re.S,
+    )
+    resign_body = resign_match.group("body") if resign_match else ""
+    background_match = re.search(
+        r"- \(void\) applicationDidEnterBackground:\(UIApplication \*\)application"
+        r"\s*\{(?P<body>.*?)\n\}",
+        app,
+        re.S,
+    )
+    background_body = background_match.group("body") if background_match else ""
+    background_method_index = app.find("applicationDidEnterBackground")
+    route_handler_index = app.find("application:(UIApplication *)application openURL:")
+    require(
+        "[self clearPendingRoute];" not in resign_body,
+        "temporary resign-active transitions must preserve pending routes",
+        failures,
+    )
+    require(
+        background_match is not None
+        and background_body.count("[self clearPendingRoute];") == 1
+        and background_method_index < route_handler_index,
+        "background entry must clear pending routes before later route handling",
         failures,
     )
     location_failure_match = re.search(
