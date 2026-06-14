@@ -29,6 +29,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-13-maprouter-transient-location-errors.md",
     DOCS_PLANS / "2026-06-13-maprouter-background-route-cleanup.md",
     DOCS_PLANS / "2026-06-13-maprouter-transient-location-samples.md",
+    DOCS_PLANS / "2026-06-14-maprouter-make-root-override-protection.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -474,11 +475,13 @@ def main():
         failures,
     )
     makefile = MAKEFILE.read_text(encoding="utf-8")
+    makefile_lines = set(makefile.splitlines())
     require(
-        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))" in makefile,
-        "Makefile must resolve the repository root",
+        "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))" in makefile_lines,
+        "Makefile must protect the repository root",
         failures,
     )
+    require("PYTHON ?= python3" in makefile_lines, "Makefile must preserve the Python command override", failures)
     require(
         "CHECK_SCRIPT := $(ROOT)/scripts/check_wren_maprouter_contracts.py" in makefile,
         "Makefile must use the rooted checker path",

@@ -1,6 +1,6 @@
 # MapRouter Make Root Override Protection
 
-Status: Planned
+Status: Completed
 
 ## Problem
 
@@ -30,3 +30,19 @@ line and redirect verification away from the checkout.
 - Do not change Objective-C behavior, project metadata, workflows, assets, or
   deployment configuration.
 - Do not merge or close any pull request without explicit owner authorization.
+
+## Work Completed
+
+- Protected the Makefile-derived root while preserving the Python override and
+  existing targets.
+- Added exact portable contracts for protected derivation, checker/project
+  paths, Python override semantics, and this completed plan.
+
+## Verification Results
+
+- Python compilation and the portable checker passed.
+- Local, external-directory, and hostile `ROOT` full `make check` gates passed;
+  each truthfully skipped the unavailable Linux `xcodebuild`.
+- Eight focused root, tool, path, and plan-status mutations were rejected.
+- Plist/JSON/XML/workflow, whitespace, explicit-artifact, and changed-line
+  credential audits passed before shipment.

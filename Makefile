@@ -1,7 +1,7 @@
 .PHONY: lint test build verify check
 
 PYTHON ?= python3
-ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 CHECK_SCRIPT := $(ROOT)/scripts/check_wren_maprouter_contracts.py
 PROJECT := $(ROOT)/GoogleTransit.xcodeproj
 
