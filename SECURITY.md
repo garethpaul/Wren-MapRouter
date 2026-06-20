@@ -40,8 +40,18 @@ when forwarding cannot proceed.
 
 Current-location routing should ignore future-dated or stale cached samples and
 wait for a fresh coordinate before forwarding externally.
+Unusable individual samples should also preserve the pending route while Core
+Location continues updating; terminal authorization, lifecycle, and delegate
+failures must still clear route and location state.
+Forwarding opens Google Maps with source and destination query parameters; a
+Current Location endpoint therefore transmits the selected coordinate to
+Google. The sample must not persist those route values or forward them to any
+other host.
 
 ## Dependency and Supply Chain Security
+
+Hosted verification uses a credential-free checkout so its read-only token is
+not retained in the runner's Git configuration.
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 

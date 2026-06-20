@@ -25,6 +25,11 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-10-maprouter-hosted-static-verification.md",
     DOCS_PLANS / "2026-06-10-maprouter-location-freshness.md",
     DOCS_PLANS / "2026-06-10-maprouter-horizontal-accuracy-validation.md",
+    DOCS_PLANS / "2026-06-12-checkout-credential-boundary.md",
+    DOCS_PLANS / "2026-06-13-maprouter-transient-location-errors.md",
+    DOCS_PLANS / "2026-06-13-maprouter-background-route-cleanup.md",
+    DOCS_PLANS / "2026-06-13-maprouter-transient-location-samples.md",
+    DOCS_PLANS / "2026-06-14-maprouter-make-root-override-protection.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -68,6 +73,8 @@ def main():
     failures = []
 
     app = read_text("GoogleTransit/AppDelegate.m")
+    location_policy = read_text("GoogleTransit/LocationSamplePolicy.m") if (ROOT / "GoogleTransit/LocationSamplePolicy.m").is_file() else ""
+    project = read_text("GoogleTransit.xcodeproj/project.pbxproj")
     plist = read_plist("GoogleTransit/GoogleTransit-Info.plist", failures)
     workflow = read_text(".github/workflows/check.yml") if WORKFLOW.is_file() else ""
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.is_dir() else []
@@ -184,9 +191,9 @@ def main():
     )
     require(
         "encodedRouteEndpoint" in app
-        and "CFURLCreateStringByAddingPercentEscapes" in app
-        and ":/?#[]@!$&'()*+,;=" in app
-        and "stringByAddingPercentEscapesUsingEncoding" not in app,
+        and "stringByAddingPercentEncodingWithAllowedCharacters" in app
+        and '[allowedCharacters addCharactersInString:@"-._~"]' in app
+        and "URLQueryAllowedCharacterSet" not in app,
         "route endpoints must escape URL query delimiters before external forwarding",
         failures,
     )
@@ -194,7 +201,7 @@ def main():
         "NSString *trimmedEndpoint = [endpoint stringByTrimmingCharactersInSet:"
     )
     empty_endpoint_index = app.find("if ([trimmedEndpoint length] == 0)", trim_endpoint_index)
-    encoding_call_index = app.find("CFURLCreateStringByAddingPercentEscapes")
+    encoding_call_index = app.find("stringByAddingPercentEncodingWithAllowedCharacters")
     require(
         empty_endpoint_index != -1
         and encoding_call_index != -1
@@ -206,15 +213,8 @@ def main():
     require(
         trim_endpoint_index != -1
         and "whitespaceAndNewlineCharacterSet" in app
-        and "(__bridge CFStringRef)trimmedEndpoint" in app
-        and "(__bridge CFStringRef)endpoint" not in app
         and trim_endpoint_index < empty_endpoint_index < encoding_call_index,
         "route endpoint encoder must trim whitespace before empty checks and percent encoding",
-        failures,
-    )
-    require(
-        "CFBridgingRelease(encodedEndpoint)" in app,
-        "route endpoint encoder must transfer its CoreFoundation string under ARC",
         failures,
     )
     require(
@@ -253,7 +253,7 @@ def main():
     )
     location_update_index = app.find("didUpdateLocations")
     coordinate_method_index = app.find("- (NSString *) coordinateStringForLocation:(CLLocation *)location")
-    coordinate_accuracy_index = app.find("if (location.horizontalAccuracy < 0)", coordinate_method_index)
+    coordinate_accuracy_index = app.find("!isfinite(location.horizontalAccuracy)", coordinate_method_index)
     coordinate_value_index = app.find("CLLocationCoordinate2D coordinate = location.coordinate;", coordinate_method_index)
     require(
         coordinate_method_index != -1
@@ -263,52 +263,120 @@ def main():
         "route endpoint conversion must reject locations with invalid horizontal accuracy",
         failures,
     )
-    latest_location_index = app.find("CLLocation *latestLocation = [locations lastObject];", location_update_index)
-    invalid_location_index = app.find("if (!latestLocation", latest_location_index)
-    invalid_coordinate_index = app.find(
-        "!CLLocationCoordinate2DIsValid(latestLocation.coordinate)", invalid_location_index
-    )
-    update_accuracy_index = app.find("latestLocation.horizontalAccuracy < 0", invalid_location_index)
-    invalid_cleanup_index = app.find("[self clearPendingRoute];", invalid_location_index)
-    invalid_return_index = app.find("return;", invalid_cleanup_index)
+    route_guard_index = app.find("if (![self routeNeedsCurrentLocation])", location_update_index)
+    sample_selection_index = app.find("newestUsableLocationFromLocations:locations", route_guard_index)
+    invalid_location_index = app.find("if (!latestLocation)", sample_selection_index)
+    invalid_return_index = app.find("return;", invalid_location_index)
     assign_location_index = app.find("self.currentLocation = latestLocation;", invalid_return_index)
-    require(
-        latest_location_index != -1
-        and invalid_location_index != -1
-        and invalid_coordinate_index != -1
-        and invalid_cleanup_index != -1
-        and invalid_return_index != -1
-        and assign_location_index != -1
-        and latest_location_index
-        < invalid_location_index
-        < invalid_coordinate_index
-        < invalid_cleanup_index
-        < invalid_return_index
-        < assign_location_index,
-        "location updates must clear pending routes before storing missing or invalid coordinates",
-        failures,
-    )
-    require(
-        update_accuracy_index != -1
-        and invalid_coordinate_index < update_accuracy_index < invalid_cleanup_index,
-        "location updates must reject negative horizontal accuracy before cleanup and storage",
-        failures,
-    )
     require(
         "self.currentLocation = [locations lastObject]" not in app,
         "location updates must not store unvalidated latest locations",
         failures,
     )
-    freshness_index = app.find("NSTimeInterval locationAge = -[latestLocation.timestamp timeIntervalSinceNow];")
-    stale_guard_index = app.find("if (locationAge < 0 || locationAge > 60)", freshness_index)
-    stale_return_index = app.find("return;", stale_guard_index)
     require(
-        freshness_index != -1
-        and stale_guard_index != -1
-        and stale_return_index != -1
+        route_guard_index != -1
+        and sample_selection_index != -1
+        and invalid_location_index != -1
+        and invalid_return_index != -1
         and assign_location_index != -1
-        and freshness_index < stale_guard_index < stale_return_index < assign_location_index,
-        "location updates must ignore future-dated and stale cached coordinates before storing them",
+        and route_guard_index < sample_selection_index < invalid_location_index < invalid_return_index < assign_location_index,
+        "late location callbacks must not retain coordinates after route cancellation",
+        failures,
+    )
+    require(
+        "newestUsableLocationFromLocations:locations" in app,
+        "location updates must select the newest usable sample instead of trusting the final sample",
+        failures,
+    )
+    require(
+        "isfinite(location.horizontalAccuracy)" in location_policy
+        and "LocationSampleMaximumHorizontalAccuracy = 1000" in location_policy
+        and "location.horizontalAccuracy > LocationSampleMaximumHorizontalAccuracy" in location_policy,
+        "location policy must reject non-finite and excessively inaccurate samples",
+        failures,
+    )
+    require(
+        "isfinite(locationAge)" in location_policy,
+        "location policy must reject non-finite sample ages",
+        failures,
+    )
+    require(
+        "[locations reverseObjectEnumerator]" in location_policy,
+        "location policy must inspect callback batches from newest to oldest",
+        failures,
+    )
+    require(
+        "self.window.rootViewController = [[UIViewController alloc] init];" in app,
+        "current iOS launches require a root view controller",
+        failures,
+    )
+    require(
+        project.count("IPHONEOS_DEPLOYMENT_TARGET = 13.0;") >= 4,
+        "Xcode project must use a deployment target supported by the current SDK",
+        failures,
+    )
+    require(
+        "GoogleTransitTests" in project and "com.apple.product-type.bundle.unit-test" in project,
+        "Xcode project must include the native XCTest target",
+        failures,
+    )
+    resign_match = re.search(
+        r"- \(void\) applicationWillResignActive:\(UIApplication \*\)application"
+        r"\s*\{(?P<body>.*?)\n\}",
+        app,
+        re.S,
+    )
+    resign_body = resign_match.group("body") if resign_match else ""
+    background_match = re.search(
+        r"- \(void\) applicationDidEnterBackground:\(UIApplication \*\)application"
+        r"\s*\{(?P<body>.*?)\n\}",
+        app,
+        re.S,
+    )
+    background_body = background_match.group("body") if background_match else ""
+    background_method_index = app.find("applicationDidEnterBackground")
+    route_handler_index = app.find("application:(UIApplication *)application openURL:")
+    require(
+        "[self clearPendingRoute];" not in resign_body,
+        "temporary resign-active transitions must preserve pending routes",
+        failures,
+    )
+    require(
+        background_match is not None
+        and background_body.count("[self clearPendingRoute];") == 1
+        and background_method_index < route_handler_index,
+        "background entry must clear pending routes before later route handling",
+        failures,
+    )
+    location_failure_match = re.search(
+        r"- \(void\)locationManager:\(CLLocationManager \*\)manager "
+        r"didFailWithError:\(NSError \*\)error\s*\{(?P<body>.*?)\n\}",
+        app,
+        re.S,
+    )
+    location_failure_body = location_failure_match.group("body") if location_failure_match else ""
+    transient_domain_index = location_failure_body.find(
+        "[[error domain] isEqualToString:kCLErrorDomain]"
+    )
+    transient_code_index = location_failure_body.find(
+        "[error code] == kCLErrorLocationUnknown", transient_domain_index
+    )
+    transient_return_index = location_failure_body.find("return;", transient_code_index)
+    terminal_cleanup_index = location_failure_body.find(
+        "[self clearPendingRoute];", transient_return_index
+    )
+    require(
+        location_failure_match is not None
+        and transient_domain_index != -1
+        and transient_code_index != -1
+        and transient_return_index != -1
+        and terminal_cleanup_index != -1
+        and location_failure_body.count("[self clearPendingRoute];") == 1
+        and transient_domain_index
+        < transient_code_index
+        < transient_return_index
+        < terminal_cleanup_index,
+        "transient Core Location failures must preserve pending routes before terminal cleanup",
         failures,
     )
     require(WORKFLOW.is_file(), "hosted verification workflow must exist", failures)
@@ -351,12 +419,60 @@ def main():
         failures,
     )
     require("ubuntu-latest" not in workflow, "hosted verification must not use a floating runner", failures)
-    makefile = MAKEFILE.read_text(encoding="utf-8")
+    workflow_files = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in WORKFLOW.parent.iterdir()
+        if path.is_file()
+    )
+    checkout_step = (
+        "      - name: Check out repository\n"
+        "        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3\n"
+        "        with:\n"
+        "          persist-credentials: false"
+    )
     require(
-        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))" in makefile,
-        "Makefile must resolve the repository root",
+        workflow_files == [".github/workflows/check.yml"],
+        "workflow inventory must contain only .github/workflows/check.yml",
         failures,
     )
+    require(
+        workflow.count("actions/checkout@") == 2
+        and workflow.count(checkout_step) == 2,
+        "hosted verification must use pinned credential-free checkout steps",
+        failures,
+    )
+    require(
+        workflow.count("persist-credentials:") == 2
+        and workflow.count("persist-credentials: false") == 2
+        and "persist-credentials: true" not in workflow,
+        "hosted verification must not persist checkout credentials",
+        failures,
+    )
+    checkout_plan = read_text("docs/plans/2026-06-12-checkout-credential-boundary.md")
+    require(
+        "status: completed" in checkout_plan.lower()
+        and "persist-credentials: false" in checkout_plan
+        and "hostile mutations rejected" in checkout_plan,
+        "checkout credential plan must record completed verification",
+        failures,
+    )
+    guidance = " ".join(
+        "\n".join(read_text(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()
+    ).lower()
+    require(
+        "checkout credentials are not persisted" in guidance
+        and "credential-free checkout" in guidance,
+        "repository guidance must document the credential-free checkout boundary",
+        failures,
+    )
+    makefile = MAKEFILE.read_text(encoding="utf-8")
+    makefile_lines = set(makefile.splitlines())
+    require(
+        "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))" in makefile_lines,
+        "Makefile must protect the repository root",
+        failures,
+    )
+    require("PYTHON ?= python3" in makefile_lines, "Makefile must preserve the Python command override", failures)
     require(
         "CHECK_SCRIPT := $(ROOT)/scripts/check_wren_maprouter_contracts.py" in makefile,
         "Makefile must use the rooted checker path",
@@ -364,7 +480,9 @@ def main():
     )
     require(
         "PROJECT := $(ROOT)/GoogleTransit.xcodeproj" in makefile
-        and '-project "$(PROJECT)"' in makefile,
+        and '-project "$(PROJECT)"' in makefile
+        and '-derivedDataPath "$(BUILD_DERIVED_DATA)"' in makefile
+        and '-derivedDataPath "$(TEST_DERIVED_DATA)"' in makefile,
         "optional Xcode build must use the rooted project path",
         failures,
     )

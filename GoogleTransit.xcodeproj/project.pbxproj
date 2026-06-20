@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10000000000000000000001 /* LocationSamplePolicy.m in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* LocationSamplePolicy.m */; };
+		A10000000000000000000003 /* LocationSamplePolicyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* LocationSamplePolicyTests.m */; };
+		A10000000000000000000004 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* XCTest.framework */; };
+		A10000000000000000000005 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F44E8EF2160B501700DED148 /* CoreLocation.framework */; };
+		A10000000000000000000006 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F4C2EB160B396F0055EF42 /* Foundation.framework */; };
 		F44E8EF3160B501700DED148 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F44E8EF2160B501700DED148 /* CoreLocation.framework */; };
 		F4F4C2EA160B396F0055EF42 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F4C2E9160B396F0055EF42 /* UIKit.framework */; };
 		F4F4C2EC160B396F0055EF42 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F4C2EB160B396F0055EF42 /* Foundation.framework */; };
@@ -20,7 +25,22 @@
 		F4F4C308160B3DBD0055EF42 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F4C307160B3DBD0055EF42 /* MapKit.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		F10000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F4F4C2DC160B396F0055EF42 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F4F4C2E4160B396F0055EF42;
+			remoteInfo = GoogleTransit;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		B10000000000000000000001 /* LocationSamplePolicy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocationSamplePolicy.h; sourceTree = "<group>"; };
+		B10000000000000000000002 /* LocationSamplePolicy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocationSamplePolicy.m; sourceTree = "<group>"; };
+		B10000000000000000000003 /* LocationSamplePolicyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocationSamplePolicyTests.m; sourceTree = "<group>"; };
+		B10000000000000000000004 /* GoogleTransitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GoogleTransitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000005 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 		F44E8EF2160B501700DED148 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		F4F4C2E5160B396F0055EF42 /* GoogleTransit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GoogleTransit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4F4C2E9160B396F0055EF42 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -40,6 +60,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		C10000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000004 /* XCTest.framework in Frameworks */,
+				A10000000000000000000005 /* CoreLocation.framework in Frameworks */,
+				A10000000000000000000006 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F4F4C2E2160B396F0055EF42 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -59,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				F4F4C2EF160B396F0055EF42 /* GoogleTransit */,
+				D10000000000000000000001 /* GoogleTransitTests */,
 				F4F4C2E8160B396F0055EF42 /* Frameworks */,
 				F4F4C2E6160B396F0055EF42 /* Products */,
 			);
@@ -68,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				F4F4C2E5160B396F0055EF42 /* GoogleTransit.app */,
+				B10000000000000000000004 /* GoogleTransitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -75,6 +107,7 @@
 		F4F4C2E8160B396F0055EF42 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B10000000000000000000005 /* XCTest.framework */,
 				F44E8EF2160B501700DED148 /* CoreLocation.framework */,
 				F4F4C307160B3DBD0055EF42 /* MapKit.framework */,
 				F4F4C2E9160B396F0055EF42 /* UIKit.framework */,
@@ -89,6 +122,8 @@
 			children = (
 				F4F4C2F8160B39700055EF42 /* AppDelegate.h */,
 				F4F4C2F9160B39700055EF42 /* AppDelegate.m */,
+				B10000000000000000000001 /* LocationSamplePolicy.h */,
+				B10000000000000000000002 /* LocationSamplePolicy.m */,
 				F4F4C2F0160B396F0055EF42 /* Supporting Files */,
 			);
 			path = GoogleTransit;
@@ -109,9 +144,35 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		D10000000000000000000001 /* GoogleTransitTests */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000003 /* LocationSamplePolicyTests.m */,
+			);
+			path = GoogleTransitTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E10000000000000000000001 /* GoogleTransitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = H10000000000000000000001 /* Build configuration list for PBXNativeTarget "GoogleTransitTests" */;
+			buildPhases = (
+				C10000000000000000000001 /* Sources */,
+				C10000000000000000000002 /* Frameworks */,
+				C10000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F10000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = GoogleTransitTests;
+			productName = GoogleTransitTests;
+			productReference = B10000000000000000000004 /* GoogleTransitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		F4F4C2E4160B396F0055EF42 /* GoogleTransit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F4F4C303160B39700055EF42 /* Build configuration list for PBXNativeTarget "GoogleTransit" */;
@@ -151,11 +212,19 @@
 			projectRoot = "";
 			targets = (
 				F4F4C2E4160B396F0055EF42 /* GoogleTransit */,
+				E10000000000000000000001 /* GoogleTransitTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		C10000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F4F4C2E3160B396F0055EF42 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -170,16 +239,33 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		C10000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000003 /* LocationSamplePolicyTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F4F4C2E1160B396F0055EF42 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				F4F4C2F6160B396F0055EF42 /* main.m in Sources */,
 				F4F4C2FA160B39700055EF42 /* AppDelegate.m in Sources */,
+				A10000000000000000000001 /* LocationSamplePolicy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F10000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F4F4C2E4160B396F0055EF42 /* GoogleTransit */;
+			targetProxy = F10000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		F4F4C2F2160B396F0055EF42 /* InfoPlist.strings */ = {
@@ -193,6 +279,34 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		G10000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.simonmaddox.GoogleTransitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GoogleTransit.app/GoogleTransit";
+			};
+			name = Debug;
+		};
+		G10000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.simonmaddox.GoogleTransitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GoogleTransit.app/GoogleTransit";
+			};
+			name = Release;
+		};
 		F4F4C301160B39700055EF42 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -215,7 +329,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -235,7 +349,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -248,6 +362,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GoogleTransit/GoogleTransit-Prefix.pch";
 				INFOPLIST_FILE = "GoogleTransit/GoogleTransit-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = com.simonmaddox.ios.transit.GoogleTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -259,6 +374,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GoogleTransit/GoogleTransit-Prefix.pch";
 				INFOPLIST_FILE = "GoogleTransit/GoogleTransit-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = com.simonmaddox.ios.transit.GoogleTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -267,6 +383,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		H10000000000000000000001 /* Build configuration list for PBXNativeTarget "GoogleTransitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G10000000000000000000001 /* Debug */,
+				G10000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		F4F4C2DF160B396F0055EF42 /* Build configuration list for PBXProject "GoogleTransit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

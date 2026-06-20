@@ -1,5 +1,25 @@
 # Changes
 
+## 2026-06-19
+
+- Added native XCTest coverage for finite, fresh, bounded-accuracy location
+  selection and for mixed valid/invalid callback batches.
+- Prevented late callbacks from retaining a coordinate after route cancellation,
+  reset previous location work before route replacement, and adopted modern
+  authorization and URL-opening APIs.
+- Raised the archived project to iOS 13, restored current-Xcode launch/build
+  compatibility, and documented Google Maps route-coordinate disclosure.
+
+## 2026-06-13
+
+- Preserved pending Current Location routes when Core Location emits a missing,
+  invalid-coordinate, or negative-accuracy sample while awaiting later data.
+
+## 2026-06-12
+
+- Disabled persisted checkout credentials and enforced the sole pinned
+  credential-free workflow boundary.
+
 ## 2026-06-10
 
 - Rejected Core Location objects with negative horizontal accuracy before
@@ -52,4 +72,6 @@
 - Added docs-plan coverage to the static MapRouter contract checker.
 - Added static contracts for the legacy MapKit directions handler, location permission metadata, and bundled GeoJSON artifact.
 - Hardened current-location route handling so unresolved or denied location access clears pending route state.
+- Preserved pending Current Location routes during temporary inactive states
+  while retaining cleanup when the app enters the background.
 - Added `make check` as the local verification entry point for this Objective-C iOS sample.

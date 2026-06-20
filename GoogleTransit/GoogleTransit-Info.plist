@@ -37,6 +37,8 @@
 	<string>1.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<false/>
 	<key>MKDirectionsApplicationSupportedModes</key>
 	<array>
 		<string>MKDirectionsModeBus</string>

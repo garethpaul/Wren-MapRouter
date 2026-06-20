@@ -7,8 +7,10 @@
 //
 
 #import "AppDelegate.h"
+#import "LocationSamplePolicy.h"
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import <math.h>
 
 @interface AppDelegate () <CLLocationManagerDelegate>
 
@@ -28,10 +30,12 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor blackColor];
+    self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
 
 	self.locationManager = [[CLLocationManager alloc] init];
 	self.locationManager.delegate = self;
+	self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
 
     return YES;
 }
@@ -41,21 +45,30 @@
 	[self startLocationUpdatesIfNeeded];
 }
 
-- (void) applicationWillResignActive:(UIApplication *)application
+- (void) applicationDidEnterBackground:(UIApplication *)application
 {
 	[self clearPendingRoute];
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
 {
-	if ([MKDirectionsRequest isDirectionsRequestURL:url]){
+	return [self handleDirectionsURL:url];
+}
 
-		self.currentSource = nil;
-		self.currentDestination = nil;
-		self.currentSourceNeedsLocation = NO;
-		self.currentDestinationNeedsLocation = NO;
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *)options
+{
+	return [self handleDirectionsURL:url];
+}
+
+- (BOOL) handleDirectionsURL:(NSURL *)url
+{
+	if ([MKDirectionsRequest isDirectionsRequestURL:url]){
+		[self clearPendingRoute];
 
 		MKDirectionsRequest *directionsRequest = [[MKDirectionsRequest alloc] initWithContentsOfURL:url];
+		if (!directionsRequest){
+			return NO;
+		}
 
 		self.currentSourceNeedsLocation = directionsRequest.source.isCurrentLocation;
 		self.currentDestinationNeedsLocation = directionsRequest.destination.isCurrentLocation;
@@ -81,7 +94,12 @@
 		return;
 	}
 
-	CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+	CLAuthorizationStatus status;
+	if (@available(iOS 14.0, *)){
+		status = self.locationManager.authorizationStatus;
+	} else {
+		status = [CLLocationManager authorizationStatus];
+	}
 	if (status == kCLAuthorizationStatusNotDetermined){
 		if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]){
 			[self.locationManager requestWhenInUseAuthorization];
@@ -91,12 +109,8 @@
 		return;
 	}
 
-	BOOL authorized = status == kCLAuthorizationStatusAuthorized;
-#ifdef __IPHONE_8_0
-	authorized = authorized ||
-		status == kCLAuthorizationStatusAuthorizedAlways ||
+	BOOL authorized = status == kCLAuthorizationStatusAuthorizedAlways ||
 		status == kCLAuthorizationStatusAuthorizedWhenInUse;
-#endif
 
 	if (authorized){
 		[self.locationManager startUpdatingLocation];
@@ -129,7 +143,7 @@
 	if (!location){
 		return nil;
 	}
-	if (location.horizontalAccuracy < 0){
+	if (!isfinite(location.horizontalAccuracy) || location.horizontalAccuracy < 0){
 		return nil;
 	}
 
@@ -206,12 +220,9 @@
 		return nil;
 	}
 
-	CFStringRef encodedEndpoint = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
-																		  (__bridge CFStringRef)trimmedEndpoint,
-																		  NULL,
-																		  CFSTR(":/?#[]@!$&'()*+,;="),
-																		  kCFStringEncodingUTF8);
-	return CFBridgingRelease(encodedEndpoint);
+	NSMutableCharacterSet *allowedCharacters = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+	[allowedCharacters addCharactersInString:@"-._~"];
+	return [trimmedEndpoint stringByAddingPercentEncodingWithAllowedCharacters:allowedCharacters];
 }
 
 - (void) openURL:(NSURL *)url
@@ -224,10 +235,12 @@
 		return;
 	}
 
-	UIApplication *application = [UIApplication sharedApplication];
-	if ([application canOpenURL:url]){
-		[application openURL:url];
-	}
+	dispatch_async(dispatch_get_main_queue(), ^{
+		UIApplication *application = [UIApplication sharedApplication];
+		if ([application canOpenURL:url]){
+			[application openURL:url options:@{} completionHandler:nil];
+		}
+	});
 }
 
 - (BOOL) isAllowedExternalURL:(NSURL *)url
@@ -240,16 +253,13 @@
 - (void)locationManager:(CLLocationManager *)manager
 	 didUpdateLocations:(NSArray *)locations
 {
-	CLLocation *latestLocation = [locations lastObject];
-	if (!latestLocation ||
-		!CLLocationCoordinate2DIsValid(latestLocation.coordinate) ||
-		latestLocation.horizontalAccuracy < 0){
-		[self clearPendingRoute];
+	if (![self routeNeedsCurrentLocation]){
 		return;
 	}
 
-	NSTimeInterval locationAge = -[latestLocation.timestamp timeIntervalSinceNow];
-	if (locationAge < 0 || locationAge > 60){
+	CLLocation *latestLocation = [LocationSamplePolicy newestUsableLocationFromLocations:locations
+																 now:[NSDate date]];
+	if (!latestLocation){
 		return;
 	}
 
@@ -262,8 +272,18 @@
 	[self startLocationUpdatesIfNeeded];
 }
 
+- (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager
+{
+	[self startLocationUpdatesIfNeeded];
+}
+
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
+	if ([[error domain] isEqualToString:kCLErrorDomain] &&
+		[error code] == kCLErrorLocationUnknown){
+		return;
+	}
+
 	[self clearPendingRoute];
 }
 

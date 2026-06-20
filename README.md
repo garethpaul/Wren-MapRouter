@@ -3,6 +3,11 @@
 <!-- README-OVERVIEW-IMAGE -->
 ![Project overview](docs/readme-overview.svg)
 
+## Device Preview
+
+<!-- DEVICE-PREVIEW-IMAGE -->
+![Device preview](docs/device-preview.svg)
+
 ## Overview
 
 `garethpaul/Wren-MapRouter` is an Apple platform application or Objective-C/Swift sample. Steve Wren's Map Router
@@ -49,15 +54,17 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
 - GitHub Actions runs the portable gate on Python 3.10, 3.12, and 3.14 with
   fixed Ubuntu 24.04 runners, read-only permissions, superseded-run
-  cancellation, and manual dispatch; Linux runners intentionally skip the
-  Xcode build pending the Objective-C and deployment-target migration.
+  cancellation, and manual dispatch. A macOS gate also builds the iOS 13+
+  target and runs the native XCTest policy suite on an available simulator.
+  Checkout credentials are not persisted after source retrieval.
 - `make verify` - checks Maps directions registration, location permission
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
   URL forwarding host/path allowlists, route endpoint encoding, query delimiter
   escaping, cleanup on encoding failure, and incomplete non-location route
-  cleanup, empty and whitespace-only endpoint rejection, plus invalid
-  location-update cleanup, negative horizontal-accuracy rejection, and
-  cached-location freshness rejection
+  cleanup, empty and whitespace-only endpoint rejection, plus transient invalid
+  location-sample rejection, negative horizontal-accuracy rejection, and
+  cached-location freshness rejection, and transient Core Location error
+  preservation
 - Completed maintenance plans live under `docs/plans` and are checked by
   `make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
@@ -68,10 +75,16 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 - The app uses current location only to resolve a Maps directions endpoint that explicitly uses Current Location. Do not add route or location persistence without a privacy plan.
+- Source, destination, and any resolved current-location coordinate are sent to
+  `https://maps.google.com/maps` when the app forwards the transit route. The
+  app does not retain those values after forwarding or cancellation.
 - Future-dated and older-than-60-second cached locations are ignored while the
   router waits for a fresh coordinate.
-- Locations with negative horizontal accuracy are rejected because Core
-  Location marks their latitude and longitude invalid.
+- Missing, invalid-coordinate, and negative-accuracy samples are ignored
+  without abandoning the pending route or stopping location updates.
+- `kCLErrorLocationUnknown` keeps the pending Current Location route active so
+  Core Location can deliver a later coordinate; other delegate failures clear
+  route state and stop updates.
 - Route endpoints are trimmed before encoding so whitespace-only endpoints are
   not forwarded to external maps.
 
@@ -105,7 +118,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `docs/plans/2026-06-09-maprouter-incomplete-route-cleanup.md` for route
   cleanup when a non-location route cannot resolve both endpoints.
 - See `docs/plans/2026-06-09-maprouter-location-update-validation.md` for
-  cleanup when CoreLocation returns no location or an invalid coordinate.
+  the original no-location and invalid-coordinate validation boundary.
 - See `docs/plans/2026-06-09-maprouter-whitespace-endpoint-guard.md` for
   trimming route endpoints before empty checks and external URL forwarding.
 - See `docs/plans/2026-06-10-maprouter-hosted-static-verification.md` for the
@@ -114,6 +127,13 @@ When the required SDK or runtime is unavailable, use static checks and source re
   location rejection and root-independent verification.
 - See `docs/plans/2026-06-10-maprouter-horizontal-accuracy-validation.md` for
   rejecting Core Location samples whose coordinates are marked invalid.
+- See `docs/plans/2026-06-13-maprouter-transient-location-errors.md` for
+  preserving pending routes across temporary location acquisition failures.
+- See `docs/plans/2026-06-13-maprouter-background-route-cleanup.md` for
+  preserving routes during temporary inactive states and clearing on
+  background entry.
+- See `docs/plans/2026-06-13-maprouter-transient-location-samples.md` for
+  preserving pending routes while Core Location emits unusable samples.
 
 ## Contributing
 
