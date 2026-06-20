@@ -43,6 +43,10 @@ wait for a fresh coordinate before forwarding externally.
 Unusable individual samples should also preserve the pending route while Core
 Location continues updating; terminal authorization, lifecycle, and delegate
 failures must still clear route and location state.
+Forwarding opens Google Maps with source and destination query parameters; a
+Current Location endpoint therefore transmits the selected coordinate to
+Google. The sample must not persist those route values or forward them to any
+other host.
 
 ## Dependency and Supply Chain Security
 

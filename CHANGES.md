@@ -1,5 +1,15 @@
 # Changes
 
+## 2026-06-19
+
+- Added native XCTest coverage for finite, fresh, bounded-accuracy location
+  selection and for mixed valid/invalid callback batches.
+- Prevented late callbacks from retaining a coordinate after route cancellation,
+  reset previous location work before route replacement, and adopted modern
+  authorization and URL-opening APIs.
+- Raised the archived project to iOS 13, restored current-Xcode launch/build
+  compatibility, and documented Google Maps route-coordinate disclosure.
+
 ## 2026-06-13
 
 - Preserved pending Current Location routes when Core Location emits a missing,

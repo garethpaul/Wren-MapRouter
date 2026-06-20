@@ -54,8 +54,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
 - GitHub Actions runs the portable gate on Python 3.10, 3.12, and 3.14 with
   fixed Ubuntu 24.04 runners, read-only permissions, superseded-run
-  cancellation, and manual dispatch; Linux runners intentionally skip the
-  Xcode build pending the Objective-C and deployment-target migration.
+  cancellation, and manual dispatch. A macOS gate also builds the iOS 13+
+  target and runs the native XCTest policy suite on an available simulator.
   Checkout credentials are not persisted after source retrieval.
 - `make verify` - checks Maps directions registration, location permission
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
@@ -75,6 +75,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 - The app uses current location only to resolve a Maps directions endpoint that explicitly uses Current Location. Do not add route or location persistence without a privacy plan.
+- Source, destination, and any resolved current-location coordinate are sent to
+  `https://maps.google.com/maps` when the app forwards the transit route. The
+  app does not retain those values after forwarding or cancellation.
 - Future-dated and older-than-60-second cached locations are ignored while the
   router waits for a fresh coordinate.
 - Missing, invalid-coordinate, and negative-accuracy samples are ignored

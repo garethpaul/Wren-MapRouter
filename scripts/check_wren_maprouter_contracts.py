@@ -73,6 +73,8 @@ def main():
     failures = []
 
     app = read_text("GoogleTransit/AppDelegate.m")
+    location_policy = read_text("GoogleTransit/LocationSamplePolicy.m") if (ROOT / "GoogleTransit/LocationSamplePolicy.m").is_file() else ""
+    project = read_text("GoogleTransit.xcodeproj/project.pbxproj")
     plist = read_plist("GoogleTransit/GoogleTransit-Info.plist", failures)
     workflow = read_text(".github/workflows/check.yml") if WORKFLOW.is_file() else ""
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.is_dir() else []
@@ -189,9 +191,9 @@ def main():
     )
     require(
         "encodedRouteEndpoint" in app
-        and "CFURLCreateStringByAddingPercentEscapes" in app
-        and ":/?#[]@!$&'()*+,;=" in app
-        and "stringByAddingPercentEscapesUsingEncoding" not in app,
+        and "stringByAddingPercentEncodingWithAllowedCharacters" in app
+        and '[allowedCharacters addCharactersInString:@"-._~"]' in app
+        and "URLQueryAllowedCharacterSet" not in app,
         "route endpoints must escape URL query delimiters before external forwarding",
         failures,
     )
@@ -199,7 +201,7 @@ def main():
         "NSString *trimmedEndpoint = [endpoint stringByTrimmingCharactersInSet:"
     )
     empty_endpoint_index = app.find("if ([trimmedEndpoint length] == 0)", trim_endpoint_index)
-    encoding_call_index = app.find("CFURLCreateStringByAddingPercentEscapes")
+    encoding_call_index = app.find("stringByAddingPercentEncodingWithAllowedCharacters")
     require(
         empty_endpoint_index != -1
         and encoding_call_index != -1
@@ -211,15 +213,8 @@ def main():
     require(
         trim_endpoint_index != -1
         and "whitespaceAndNewlineCharacterSet" in app
-        and "(__bridge CFStringRef)trimmedEndpoint" in app
-        and "(__bridge CFStringRef)endpoint" not in app
         and trim_endpoint_index < empty_endpoint_index < encoding_call_index,
         "route endpoint encoder must trim whitespace before empty checks and percent encoding",
-        failures,
-    )
-    require(
-        "CFBridgingRelease(encodedEndpoint)" in app,
-        "route endpoint encoder must transfer its CoreFoundation string under ARC",
         failures,
     )
     require(
@@ -258,7 +253,7 @@ def main():
     )
     location_update_index = app.find("didUpdateLocations")
     coordinate_method_index = app.find("- (NSString *) coordinateStringForLocation:(CLLocation *)location")
-    coordinate_accuracy_index = app.find("if (location.horizontalAccuracy < 0)", coordinate_method_index)
+    coordinate_accuracy_index = app.find("!isfinite(location.horizontalAccuracy)", coordinate_method_index)
     coordinate_value_index = app.find("CLLocationCoordinate2D coordinate = location.coordinate;", coordinate_method_index)
     require(
         coordinate_method_index != -1
@@ -268,55 +263,61 @@ def main():
         "route endpoint conversion must reject locations with invalid horizontal accuracy",
         failures,
     )
-    latest_location_index = app.find("CLLocation *latestLocation = [locations lastObject];", location_update_index)
-    invalid_location_index = app.find("if (!latestLocation", latest_location_index)
-    invalid_coordinate_index = app.find(
-        "!CLLocationCoordinate2DIsValid(latestLocation.coordinate)", invalid_location_index
-    )
-    update_accuracy_index = app.find("latestLocation.horizontalAccuracy < 0", invalid_location_index)
+    route_guard_index = app.find("if (![self routeNeedsCurrentLocation])", location_update_index)
+    sample_selection_index = app.find("newestUsableLocationFromLocations:locations", route_guard_index)
+    invalid_location_index = app.find("if (!latestLocation)", sample_selection_index)
     invalid_return_index = app.find("return;", invalid_location_index)
-    location_age_index = app.find("NSTimeInterval locationAge", invalid_return_index)
     assign_location_index = app.find("self.currentLocation = latestLocation;", invalid_return_index)
-    require(
-        latest_location_index != -1
-        and invalid_location_index != -1
-        and invalid_coordinate_index != -1
-        and invalid_return_index != -1
-        and location_age_index != -1
-        and assign_location_index != -1
-        and latest_location_index
-        < invalid_location_index
-        < invalid_coordinate_index
-        < invalid_return_index
-        < location_age_index
-        < assign_location_index,
-        "unusable location samples must return before freshness checks and storage",
-        failures,
-    )
-    require(
-        update_accuracy_index != -1
-        and invalid_coordinate_index < update_accuracy_index < invalid_return_index,
-        "location updates must reject negative horizontal accuracy before returning",
-        failures,
-    )
-    invalid_sample_body = app[invalid_location_index:invalid_return_index]
-    require(
-        "clearPendingRoute" not in invalid_sample_body,
-        "transient unusable samples must preserve the pending route and active updates",
-        failures,
-    )
-    require(
-        "if (!latestLocation ||\n"
-        "\t\t!CLLocationCoordinate2DIsValid(latestLocation.coordinate) ||\n"
-        "\t\tlatestLocation.horizontalAccuracy < 0){\n"
-        "\t\treturn;\n"
-        "\t}" in app,
-        "unusable location samples must use an unconditional early return",
-        failures,
-    )
     require(
         "self.currentLocation = [locations lastObject]" not in app,
         "location updates must not store unvalidated latest locations",
+        failures,
+    )
+    require(
+        route_guard_index != -1
+        and sample_selection_index != -1
+        and invalid_location_index != -1
+        and invalid_return_index != -1
+        and assign_location_index != -1
+        and route_guard_index < sample_selection_index < invalid_location_index < invalid_return_index < assign_location_index,
+        "late location callbacks must not retain coordinates after route cancellation",
+        failures,
+    )
+    require(
+        "newestUsableLocationFromLocations:locations" in app,
+        "location updates must select the newest usable sample instead of trusting the final sample",
+        failures,
+    )
+    require(
+        "isfinite(location.horizontalAccuracy)" in location_policy
+        and "LocationSampleMaximumHorizontalAccuracy = 1000" in location_policy
+        and "location.horizontalAccuracy > LocationSampleMaximumHorizontalAccuracy" in location_policy,
+        "location policy must reject non-finite and excessively inaccurate samples",
+        failures,
+    )
+    require(
+        "isfinite(locationAge)" in location_policy,
+        "location policy must reject non-finite sample ages",
+        failures,
+    )
+    require(
+        "[locations reverseObjectEnumerator]" in location_policy,
+        "location policy must inspect callback batches from newest to oldest",
+        failures,
+    )
+    require(
+        "self.window.rootViewController = [[UIViewController alloc] init];" in app,
+        "current iOS launches require a root view controller",
+        failures,
+    )
+    require(
+        project.count("IPHONEOS_DEPLOYMENT_TARGET = 13.0;") >= 4,
+        "Xcode project must use a deployment target supported by the current SDK",
+        failures,
+    )
+    require(
+        "GoogleTransitTests" in project and "com.apple.product-type.bundle.unit-test" in project,
+        "Xcode project must include the native XCTest target",
         failures,
     )
     resign_match = re.search(
@@ -378,18 +379,6 @@ def main():
         "transient Core Location failures must preserve pending routes before terminal cleanup",
         failures,
     )
-    freshness_index = app.find("NSTimeInterval locationAge = -[latestLocation.timestamp timeIntervalSinceNow];")
-    stale_guard_index = app.find("if (locationAge < 0 || locationAge > 60)", freshness_index)
-    stale_return_index = app.find("return;", stale_guard_index)
-    require(
-        freshness_index != -1
-        and stale_guard_index != -1
-        and stale_return_index != -1
-        and assign_location_index != -1
-        and freshness_index < stale_guard_index < stale_return_index < assign_location_index,
-        "location updates must ignore future-dated and stale cached coordinates before storing them",
-        failures,
-    )
     require(WORKFLOW.is_file(), "hosted verification workflow must exist", failures)
     require(
         "permissions:\n  contents: read" in workflow,
@@ -447,12 +436,14 @@ def main():
         failures,
     )
     require(
-        workflow.count("actions/checkout@") == 1 and checkout_step in workflow,
-        "hosted verification must use one pinned credential-free checkout",
+        workflow.count("actions/checkout@") == 2
+        and workflow.count(checkout_step) == 2,
+        "hosted verification must use pinned credential-free checkout steps",
         failures,
     )
     require(
-        workflow.count("persist-credentials:") == 1
+        workflow.count("persist-credentials:") == 2
+        and workflow.count("persist-credentials: false") == 2
         and "persist-credentials: true" not in workflow,
         "hosted verification must not persist checkout credentials",
         failures,
@@ -489,7 +480,9 @@ def main():
     )
     require(
         "PROJECT := $(ROOT)/GoogleTransit.xcodeproj" in makefile
-        and '-project "$(PROJECT)"' in makefile,
+        and '-project "$(PROJECT)"' in makefile
+        and '-derivedDataPath "$(BUILD_DERIVED_DATA)"' in makefile
+        and '-derivedDataPath "$(TEST_DERIVED_DATA)"' in makefile,
         "optional Xcode build must use the rooted project path",
         failures,
     )
