@@ -32,7 +32,7 @@
 
 - Treat `/usr/bin/make check` as the minimum portable baseline; native XCTest also runs when Xcode is available.
 - Start with the narrowest relevant test or Make target, then run `/usr/bin/make check` before handing off if the change is not documentation-only.
-- Keep Make tool, root, shell, startup-file, recipe, and derived-data paths under repository authority; do not weaken the containment harness to permit caller-controlled cleanup paths.
+- Keep the system Make entry point, root, shell, startup-file, recipe, and derived-data paths under repository authority; explicit literal Python/Xcode selections may be frozen, but do not weaken the containment harness to permit caller-controlled cleanup paths.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 
 ## PR / change guidance

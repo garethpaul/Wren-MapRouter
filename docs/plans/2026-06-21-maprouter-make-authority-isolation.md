@@ -11,8 +11,9 @@ accidental command-line override could redirect cleanup outside the checkout.
 
 ## Requirements
 
-1. Resolve verification tools, shell behavior, and the repository root from
-   trusted literal values.
+1. Resolve default verification tools from literal paths, freeze any explicit
+   literal tool selection, and keep shell behavior and the repository root
+   under repository control.
 2. Reject injected Make syntax, startup files, replacement recipes, and modes
    that skip or ignore verification work.
 3. Keep build and XCTest derived-data cleanup beneath `.build/` regardless of
@@ -22,8 +23,8 @@ accidental command-line override could redirect cleanup outside the checkout.
 
 ## Work Completed
 
-- Froze Python, Xcode, shell, root, and derived-data values before defining
-  public recipes.
+- Froze literal Python/Xcode selections plus repository-controlled shell, root,
+  and derived-data values before defining public recipes.
 - Rejected hostile `MAKEFLAGS`, `MAKEFILES`, `MAKEFILE_LIST`, recipe, mode,
   path, and raw Make-syntax inputs.
 - Added a root-independent shell harness that proves cleanup containment and

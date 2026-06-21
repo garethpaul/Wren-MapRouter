@@ -69,10 +69,12 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   `/usr/bin/make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
 
-Repository verification intentionally uses `/usr/bin/make` and freezes its
-tool, shell, root, startup-file, recipe, and derived-data authorities. Build and
-test cleanup is contained under `.build/`; caller-provided derived-data paths
-are ignored so verification cannot delete outside the checkout.
+Repository verification intentionally uses `/usr/bin/make`, anchors default
+tools to literal values, and freezes tool/destination selections before later
+makefiles can replace them. Its shell, root, startup-file, recipe, and
+derived-data paths remain repository-controlled. Build and test cleanup is
+contained under `.build/`; caller-provided derived-data paths are ignored so
+verification cannot delete outside the checkout.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
