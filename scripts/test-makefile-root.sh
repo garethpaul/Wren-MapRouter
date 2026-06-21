@@ -3,7 +3,7 @@ set -eu
 
 PATH=/usr/bin:/bin
 export PATH
-ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && /bin/pwd -P)
+ROOT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && /bin/pwd -P)
 TEMP_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/wren-maprouter-make-authority-XXXXXX")
 trap 'rm -rf "$TEMP_ROOT"' EXIT HUP INT TERM
 unset BUILD_DERIVED_DATA BUILD_DESTINATION MAKEFILES MAKEFILE_LIST MAKEFLAGS MFLAGS MAKEOVERRIDES PYTHON ROOT SHELL TEST_DERIVED_DATA TEST_DESTINATION XCODEBUILD
@@ -15,8 +15,8 @@ AUTHORITY_PATH="$TEMP_ROOT/no-platform-tools"
 LOG="$TEMP_ROOT/commands.log"
 SHELL_LOG="$TEMP_ROOT/shell.log"
 mkdir -p "$CONTROL_DIR" "$CHECKOUT/scripts" "$CHECKOUT/.build/build-derived-data" "$CHECKOUT/.build/test-derived-data" "$ATTACKER_ROOT" "$AUTHORITY_PATH"
-CONTROL_DIR=$(CDPATH= cd -- "$CONTROL_DIR" && /bin/pwd -P)
-CHECKOUT=$(CDPATH= cd -- "$CHECKOUT" && /bin/pwd -P)
+CONTROL_DIR=$(CDPATH='' cd -- "$CONTROL_DIR" && /bin/pwd -P)
+CHECKOUT=$(CDPATH='' cd -- "$CHECKOUT" && /bin/pwd -P)
 MAKEFILE="$CHECKOUT/Makefile"
 cp "$ROOT_DIR/Makefile" "$MAKEFILE"
 
@@ -141,6 +141,7 @@ grep -Fq 'MAKEFILE_LIST must not be overridden' "$TEMP_ROOT/list-environment.out
 
 PRE="$TEMP_ROOT/pre.mk"
 PRE_MARKER="$TEMP_ROOT/pre-marker"
+# shellcheck disable=SC2016
 printf '$(shell /usr/bin/touch %s)\n' "$PRE_MARKER" >"$PRE"
 if (cd "$CONTROL_DIR" && PATH="$AUTHORITY_PATH" MAKEFILES="$PRE" /usr/bin/make --no-print-directory -f "$MAKEFILE" check) >"$TEMP_ROOT/pre.out" 2>&1; then exit 1; fi
 grep -Fq 'MAKEFILES must be empty' "$TEMP_ROOT/pre.out"
@@ -218,8 +219,9 @@ printf '%s\n' "$*" >> "$WREN_PATH_XCODE_LOG"
 SCRIPT
 chmod +x "$PATH_XCODE"
 rm -f "$PATH_XCODE_LOG"
-(cd "$CONTROL_DIR" && PATH="$TEMP_ROOT:/usr/bin:/bin" WREN_PATH_XCODE_LOG="$PATH_XCODE_LOG" /usr/bin/make --no-print-directory -f "$MAKEFILE" build "PYTHON=$FAKE_PYTHON") >"$TEMP_ROOT/path-xcode.out" 2>&1
+(cd "$CONTROL_DIR" && PATH="$TEMP_ROOT:/usr/bin:/bin" WREN_PATH_XCODE_LOG="$PATH_XCODE_LOG" /usr/bin/make --no-print-directory -f "$MAKEFILE" build "PYTHON=$FAKE_PYTHON" XCODEBUILD=/definitely/not-xcodebuild) >"$TEMP_ROOT/path-xcode.out" 2>&1
 [ ! -e "$PATH_XCODE_LOG" ]
+grep -Fq 'xcodebuild unavailable; skipping legacy iOS build' "$TEMP_ROOT/path-xcode.out"
 
 EXPLICIT_XCODE="$TEMP_ROOT/explicit xcodebuild"
 EXPLICIT_XCODE_LOG="$TEMP_ROOT/explicit-xcode.log"

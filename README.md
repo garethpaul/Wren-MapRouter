@@ -71,10 +71,16 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 Repository verification intentionally uses `/usr/bin/make`, anchors default
 tools to literal values, and freezes tool/destination selections before later
-makefiles can replace them. Its shell, root, startup-file, recipe, and
-derived-data paths remain repository-controlled. Build and test cleanup is
-contained under `.build/`; caller-provided derived-data paths are ignored so
-verification cannot delete outside the checkout.
+makefiles can replace them. Its checked-in recipes keep root, recipe
+replacement, execution-mode, and derived-data cleanup under the repository
+boundary, so build and test cleanup stays contained under `.build/` and
+caller-provided derived-data paths are ignored.
+
+That boundary is not a sandbox for caller-supplied Make programs. Target-
+specific `override SHELL`/`.SHELLFLAGS`, startup parse-time code from
+`MAKEFILES` or extra `-f` inputs, and the default `PYTHON=python3` lookup
+through caller `PATH` remain caller authority. Use a trusted `PATH` or an
+explicit literal `PYTHON=/path/to/python3` for local verification.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 

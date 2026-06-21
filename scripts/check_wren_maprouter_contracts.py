@@ -477,6 +477,17 @@ def main():
         "repository guidance must document the credential-free checkout boundary",
         failures,
     )
+    for boundary in (
+        "target-specific override shell",
+        "startup parse-time code",
+        "default path-selected python",
+        "caller authority",
+    ):
+        require(
+            boundary in guidance,
+            "repository guidance must document caller Make boundary {0!r}".format(boundary),
+            failures,
+        )
     makefile = MAKEFILE.read_text(encoding="utf-8")
     makefile_lines = set(makefile.splitlines())
     for contract in (
@@ -542,6 +553,7 @@ def main():
         "2 startup-boundary cases",
         "9 later recipe-replacement rejections",
         "PATH-Xcode rejection",
+        "xcodebuild unavailable; skipping legacy iOS build",
         "dual derived-data cleanup containment",
         "10 mode rejections",
     ):

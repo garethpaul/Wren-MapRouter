@@ -55,10 +55,16 @@ not retained in the runner's Git configuration.
 
 Repository verification uses the system `/usr/bin/make` entry point, anchors
 default tools to literal paths, and freezes explicit literal tool selections
-before later makefiles can replace them. Its shell, root, startup-file, recipe,
-execution-mode, and derived-data paths remain repository-controlled. Xcode
-cleanup stays confined to `.build/` inside the checkout; caller-provided
-cleanup paths must never be honored.
+before later makefiles can replace them. Its checked-in recipes keep root,
+single-colon recipe replacement, execution-mode, and derived-data cleanup under
+the repository boundary. Xcode cleanup stays confined to `.build/` inside the
+checkout; caller-provided cleanup paths must never be honored.
+
+Caller-supplied Make programs remain outside that boundary. Target-specific
+`override SHELL`/`.SHELLFLAGS`, startup parse-time code from `MAKEFILES` or
+extra `-f` inputs, and the default `PYTHON=python3` lookup through caller
+`PATH` execute with caller authority. Run local verification with a trusted
+`PATH` or an explicit literal `PYTHON=/path/to/python3`.
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
