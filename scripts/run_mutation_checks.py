@@ -38,10 +38,10 @@ MUTATIONS = {
         "    self.window.rootViewController = [[UIViewController alloc] init];\n",
         "",
     ),
-    "Make root protection": (
+    "Make derived-data protection": (
         "Makefile",
-        "override ROOT :=",
-        "ROOT :=",
+        "override BUILD_DERIVED_DATA :=",
+        "BUILD_DERIVED_DATA ?=",
     ),
     "checkout credential isolation": (
         ".github/workflows/check.yml",

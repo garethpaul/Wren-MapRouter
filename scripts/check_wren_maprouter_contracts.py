@@ -30,9 +30,11 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-13-maprouter-background-route-cleanup.md",
     DOCS_PLANS / "2026-06-13-maprouter-transient-location-samples.md",
     DOCS_PLANS / "2026-06-14-maprouter-make-root-override-protection.md",
+    DOCS_PLANS / "2026-06-21-maprouter-make-authority-isolation.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
+MAKE_AUTHORITY_SCRIPT = ROOT / "scripts/test-makefile-root.sh"
 TRANSIT_MODES = {
     "MKDirectionsModeBus",
     "MKDirectionsModeFerry",
@@ -406,7 +408,17 @@ def main():
         failures,
     )
     require("timeout-minutes: 5" in workflow, "hosted verification must have a timeout", failures)
-    require("run: make check" in workflow, "hosted verification must run make check", failures)
+    require(
+        "run: /usr/bin/make check" in workflow,
+        "hosted verification must run the trusted system Make authority",
+        failures,
+    )
+    require(
+        "run: /usr/bin/make build" in workflow
+        and '/usr/bin/make xctest TEST_DESTINATION="platform=iOS Simulator,id=${device_id}"' in workflow,
+        "native verification must use the trusted system Make authority",
+        failures,
+    )
     require("concurrency:" in workflow, "hosted verification must define concurrency", failures)
     require(
         "cancel-in-progress: true" in workflow,
@@ -467,25 +479,77 @@ def main():
     )
     makefile = MAKEFILE.read_text(encoding="utf-8")
     makefile_lines = set(makefile.splitlines())
+    for contract in (
+        ".DEFAULT_GOAL := check",
+        ".SECONDEXPANSION:",
+        "PYTHON ?= python3",
+        "override PYTHON := $(value PYTHON)",
+        "XCODEBUILD ?= /usr/bin/xcodebuild",
+        "override XCODEBUILD := $(value XCODEBUILD)",
+        "override BUILD_DESTINATION := $(value BUILD_DESTINATION)",
+        "override TEST_DESTINATION := $(value TEST_DESTINATION)",
+        "override BUILD_DERIVED_DATA := $(ROOT)/.build/build-derived-data",
+        "override TEST_DERIVED_DATA := $(ROOT)/.build/test-derived-data",
+        "override SHELL := /bin/sh",
+        "override .SHELLFLAGS := -c",
+        "override MAKEFILES :=",
+        "ifneq ($(origin MAKEFILE_LIST),file)",
+        "export ROOT",
+        "root-test::",
+        "\t/bin/sh '$(REPOSITORY_ROOT_LITERAL)/scripts/test-makefile-root.sh'",
+        "verify:: root-test lint test mutations build xctest",
+    ):
+        require(
+            contract in makefile_lines,
+            "Makefile authority contract is missing {0!r}".format(contract),
+            failures,
+        )
+    require("MAKEFLAGS must not be overridden" in makefile, "Makefile must reject caller MAKEFLAGS", failures)
+    require("MAKEFILES must be empty" in makefile, "Makefile must reject startup files", failures)
+    require("MAKEFILE_LIST must not be overridden" in makefile, "Makefile must reject Makefile-list replacement", failures)
     require(
-        "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))" in makefile_lines,
-        "Makefile must protect the repository root",
+        "$(error $(1) must be a literal value, not Make syntax)" in makefile
+        and "$(foreach variable,PYTHON XCODEBUILD BUILD_DESTINATION TEST_DESTINATION,$(eval $(call REPOSITORY_REJECT_MAKE_SYNTAX,$(variable))))"
+        in makefile,
+        "Makefile must reject Make syntax in tool and destination values",
         failures,
     )
-    require("PYTHON ?= python3" in makefile_lines, "Makefile must preserve the Python command override", failures)
     require(
-        "CHECK_SCRIPT := $(ROOT)/scripts/check_wren_maprouter_contracts.py" in makefile,
-        "Makefile must use the rooted checker path",
+        "'$(REPOSITORY_ROOT_LITERAL)/scripts/check_wren_maprouter_contracts.py'" in makefile
+        and "'$(REPOSITORY_ROOT_LITERAL)/scripts/run_mutation_checks.py'" in makefile,
+        "Makefile must use rooted checker and mutation paths",
         failures,
     )
     require(
-        "PROJECT := $(ROOT)/GoogleTransit.xcodeproj" in makefile
-        and '-project "$(PROJECT)"' in makefile
-        and '-derivedDataPath "$(BUILD_DERIVED_DATA)"' in makefile
-        and '-derivedDataPath "$(TEST_DERIVED_DATA)"' in makefile,
-        "optional Xcode build must use the rooted project path",
+        "'$(REPOSITORY_ROOT_LITERAL)/GoogleTransit.xcodeproj'" in makefile
+        and "-derivedDataPath '$(REPOSITORY_BUILD_DERIVED_DATA_LITERAL)'" in makefile
+        and "-derivedDataPath '$(REPOSITORY_TEST_DERIVED_DATA_LITERAL)'" in makefile
+        and "/bin/rm -rf '$(REPOSITORY_BUILD_DERIVED_DATA_LITERAL)'" in makefile
+        and "'$(REPOSITORY_TEST_DERIVED_DATA_LITERAL)'" in makefile,
+        "optional Xcode build and test must use rooted project and derived-data paths",
         failures,
     )
+    require(
+        MAKE_AUTHORITY_SCRIPT.is_file() and MAKE_AUTHORITY_SCRIPT.stat().st_mode & 0o111,
+        "Make authority harness must exist and be executable",
+        failures,
+    )
+    authority_source = MAKE_AUTHORITY_SCRIPT.read_text(encoding="utf-8")
+    for contract in (
+        "45 target/authority cases",
+        "10 raw Make-syntax controls",
+        "2 MAKEFILE_LIST rejections",
+        "2 startup-boundary cases",
+        "9 later recipe-replacement rejections",
+        "PATH-Xcode rejection",
+        "dual derived-data cleanup containment",
+        "10 mode rejections",
+    ):
+        require(
+            contract in authority_source,
+            "Make authority harness must retain {0}".format(contract),
+            failures,
+        )
     require(DOCS_PLANS.is_dir(), "docs/plans must exist", failures)
     for plan in CANONICAL_PLANS:
         require(plan in plans, f"{plan.relative_to(ROOT)} must be present", failures)

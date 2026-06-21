@@ -51,13 +51,13 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
-- `make check` - runs dependency-free static contracts and attempts an Xcode build only when `xcodebuild` is available
+- `/usr/bin/make check` - runs dependency-free static contracts, Make authority regression tests, focused mutations, and optional Xcode build/XCTest gates when `/usr/bin/xcodebuild` is available
 - GitHub Actions runs the portable gate on Python 3.10, 3.12, and 3.14 with
   fixed Ubuntu 24.04 runners, read-only permissions, superseded-run
   cancellation, and manual dispatch. A macOS gate also builds the iOS 13+
   target and runs the native XCTest policy suite on an available simulator.
   Checkout credentials are not persisted after source retrieval.
-- `make verify` - checks Maps directions registration, location permission
+- `/usr/bin/make verify` - checks Maps directions registration, location permission
   metadata, GeoJSON validity, route parsing guards, transit modes, and external
   URL forwarding host/path allowlists, route endpoint encoding, query delimiter
   escaping, cleanup on encoding failure, and incomplete non-location route
@@ -66,8 +66,15 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   cached-location freshness rejection, and transient Core Location error
   preservation
 - Completed maintenance plans live under `docs/plans` and are checked by
-  `make check`.
+  `/usr/bin/make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
+
+Repository verification intentionally uses `/usr/bin/make`, anchors default
+tools to literal values, and freezes tool/destination selections before later
+makefiles can replace them. Its shell, root, startup-file, recipe, and
+derived-data paths remain repository-controlled. Build and test cleanup is
+contained under `.build/`; caller-provided derived-data paths are ignored so
+verification cannot delete outside the checkout.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -134,6 +141,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   background entry.
 - See `docs/plans/2026-06-13-maprouter-transient-location-samples.md` for
   preserving pending routes while Core Location emits unusable samples.
+- See `docs/plans/2026-06-21-maprouter-make-authority-isolation.md` for the
+  trusted Make boundary and derived-data cleanup containment.
 
 ## Contributing
 
