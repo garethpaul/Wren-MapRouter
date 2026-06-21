@@ -1,5 +1,14 @@
 # Changes
 
+## 2026-06-21
+
+- Isolated repository verification from caller-controlled Make tools, shells,
+  startup files, recipes, modes, and Make syntax.
+- Contained Xcode derived-data cleanup beneath the checkout and added a
+  regression harness proving hostile caller paths are never removed.
+- Aligned local and hosted verification on the trusted `/usr/bin/make`
+  authority while preserving the native simulator destination override.
+
 ## 2026-06-19
 
 - Added native XCTest coverage for finite, fresh, bounded-accuracy location
