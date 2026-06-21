@@ -32,6 +32,8 @@ accidental command-line override could redirect cleanup outside the checkout.
   trusted tool execution across every public target.
 - Documented the caller boundary for target-specific override shell settings,
   startup parse-time code, and default PATH-selected Python.
+- Isolated each selected Python invocation with `-I -B` so `PYTHONPATH`, user
+  site packages, and bytecode output cannot replace repository checkers.
 - Updated hosted verification and contributor commands to invoke
   `/usr/bin/make` explicitly.
 

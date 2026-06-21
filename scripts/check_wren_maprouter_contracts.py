@@ -531,6 +531,16 @@ def main():
         "Makefile must use rooted checker and mutation paths",
         failures,
     )
+    for python_contract in (
+        "'$(REPOSITORY_PYTHON_LITERAL)' -I -B -m py_compile",
+        "'$(REPOSITORY_PYTHON_LITERAL)' -I -B '$(REPOSITORY_ROOT_LITERAL)/scripts/check_wren_maprouter_contracts.py'",
+        "'$(REPOSITORY_PYTHON_LITERAL)' -I -B '$(REPOSITORY_ROOT_LITERAL)/scripts/run_mutation_checks.py'",
+    ):
+        require(
+            python_contract in makefile,
+            "Python verification must remain isolated from PYTHONPATH and user site state",
+            failures,
+        )
     require(
         "'$(REPOSITORY_ROOT_LITERAL)/GoogleTransit.xcodeproj'" in makefile
         and "-derivedDataPath '$(REPOSITORY_BUILD_DERIVED_DATA_LITERAL)'" in makefile
@@ -552,6 +562,7 @@ def main():
         "2 MAKEFILE_LIST rejections",
         "2 startup-boundary cases",
         "9 later recipe-replacement rejections",
+        "PYTHONPATH isolation",
         "PATH-Xcode rejection",
         "xcodebuild unavailable; skipping legacy iOS build",
         "dual derived-data cleanup containment",

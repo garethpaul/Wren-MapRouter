@@ -210,6 +210,25 @@ cp "$FAKE_PYTHON" "$PATH_PYTHON"
 rm -f "$PATH_PYTHON_LOG"
 (cd "$CONTROL_DIR" && PATH="$TEMP_ROOT:/usr/bin:/bin" WREN_COMMAND_LOG="$PATH_PYTHON_LOG" /usr/bin/make --no-print-directory -f "$MAKEFILE" lint) >"$TEMP_ROOT/path-python.out" 2>&1
 [ -s "$PATH_PYTHON_LOG" ]
+grep -Fq -- '-I -B -m py_compile' "$PATH_PYTHON_LOG"
+
+PYTHONPATH_DIR="$TEMP_ROOT/pythonpath"
+PYTHONPATH_MARKER="$TEMP_ROOT/pythonpath-marker"
+mkdir -p "$PYTHONPATH_DIR"
+cat >"$PYTHONPATH_DIR/sitecustomize.py" <<'PYTHON'
+import os
+from pathlib import Path
+
+Path(os.environ["WREN_PYTHONPATH_MARKER"]).write_text("loaded", encoding="utf-8")
+os._exit(0)
+PYTHON
+cat >"$CHECKOUT/scripts/check_wren_maprouter_contracts.py" <<'PYTHON'
+print("isolated Python executed the repository checker")
+PYTHON
+rm -f "$PYTHONPATH_MARKER"
+(cd "$CONTROL_DIR" && PATH="/usr/bin:/bin" PYTHONPATH="$PYTHONPATH_DIR" WREN_PYTHONPATH_MARKER="$PYTHONPATH_MARKER" /usr/bin/make --no-print-directory -f "$MAKEFILE" test PYTHON=/usr/bin/python3 XCODEBUILD=/definitely/not-xcodebuild) >"$TEMP_ROOT/pythonpath.out" 2>&1
+[ ! -e "$PYTHONPATH_MARKER" ]
+grep -Fq 'isolated Python executed the repository checker' "$TEMP_ROOT/pythonpath.out"
 
 PATH_XCODE="$TEMP_ROOT/xcodebuild"
 PATH_XCODE_LOG="$TEMP_ROOT/path-xcode.log"
@@ -248,4 +267,4 @@ for flag in -n --just-print --dry-run --recon -t --touch -q --question -i --igno
   grep -Fq 'non-executing or error-ignoring MAKEFLAGS are not supported' "$TEMP_ROOT/flag.out"
 done
 
-printf '%s\n' 'Make authority tests passed: 45 target/authority cases, hostile literal Python and Xcode paths, 10 raw Make-syntax controls, 2 MAKEFILE_LIST rejections, 2 startup-boundary cases, 9 later recipe-replacement rejections, later root/tool/destination/derived-data and non-override shell protection, override/startup/PATH-Python boundary controls, PATH-Xcode rejection, dual derived-data cleanup containment, caller MAKEFLAGS rejection, and 10 mode rejections'
+printf '%s\n' 'Make authority tests passed: 45 target/authority cases, hostile literal Python and Xcode paths, 10 raw Make-syntax controls, 2 MAKEFILE_LIST rejections, 2 startup-boundary cases, 9 later recipe-replacement rejections, later root/tool/destination/derived-data and non-override shell protection, override/startup/PATH-Python boundary controls, PYTHONPATH isolation, PATH-Xcode rejection, dual derived-data cleanup containment, caller MAKEFLAGS rejection, and 10 mode rejections'

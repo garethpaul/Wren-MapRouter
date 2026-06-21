@@ -80,7 +80,9 @@ That boundary is not a sandbox for caller-supplied Make programs. Target-
 specific `override SHELL`/`.SHELLFLAGS`, startup parse-time code from
 `MAKEFILES` or extra `-f` inputs, and the default `PYTHON=python3` lookup
 through caller `PATH` remain caller authority. Use a trusted `PATH` or an
-explicit literal `PYTHON=/path/to/python3` for local verification.
+explicit literal `PYTHON=/path/to/python3` for local verification. Once
+selected, Python verification runs with `-I -B`, so caller `PYTHONPATH`, user
+site packages, and bytecode output cannot replace the checked-in checkers.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 

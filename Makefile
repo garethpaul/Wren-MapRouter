@@ -92,13 +92,13 @@ clean::
 	/usr/bin/find '$(REPOSITORY_ROOT_LITERAL)' -type d -name '__pycache__' -prune -exec /bin/rm -rf {} +
 
 lint::
-	PYTHONDONTWRITEBYTECODE=1 '$(REPOSITORY_PYTHON_LITERAL)' -m py_compile '$(REPOSITORY_ROOT_LITERAL)/scripts/check_wren_maprouter_contracts.py' '$(REPOSITORY_ROOT_LITERAL)/scripts/run_mutation_checks.py'
+	'$(REPOSITORY_PYTHON_LITERAL)' -I -B -m py_compile '$(REPOSITORY_ROOT_LITERAL)/scripts/check_wren_maprouter_contracts.py' '$(REPOSITORY_ROOT_LITERAL)/scripts/run_mutation_checks.py'
 
 test::
-	PYTHONDONTWRITEBYTECODE=1 '$(REPOSITORY_PYTHON_LITERAL)' '$(REPOSITORY_ROOT_LITERAL)/scripts/check_wren_maprouter_contracts.py'
+	'$(REPOSITORY_PYTHON_LITERAL)' -I -B '$(REPOSITORY_ROOT_LITERAL)/scripts/check_wren_maprouter_contracts.py'
 
 mutations::
-	PYTHONDONTWRITEBYTECODE=1 '$(REPOSITORY_PYTHON_LITERAL)' '$(REPOSITORY_ROOT_LITERAL)/scripts/run_mutation_checks.py'
+	'$(REPOSITORY_PYTHON_LITERAL)' -I -B '$(REPOSITORY_ROOT_LITERAL)/scripts/run_mutation_checks.py'
 
 build::
 	@if [ -x '$(REPOSITORY_XCODEBUILD_LITERAL)' ]; then \

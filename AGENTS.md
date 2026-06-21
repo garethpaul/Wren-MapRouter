@@ -34,6 +34,7 @@
 - Start with the narrowest relevant test or Make target, then run `/usr/bin/make check` before handing off if the change is not documentation-only.
 - Keep the system Make entry point, repository-derived root, checked-in recipes, and derived-data paths under repository authority; explicit literal Python/Xcode selections may be frozen, but do not weaken the containment harness to permit caller-controlled cleanup paths.
 - Treat target-specific override shell settings, startup parse-time code from caller Makefiles, and default PATH-selected Python as caller authority outside the local Make boundary.
+- Keep repository Python checker invocations isolated with `-I -B`; do not reintroduce `PYTHONPATH` or user-site import authority.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 
 ## PR / change guidance

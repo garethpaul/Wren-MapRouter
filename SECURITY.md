@@ -64,7 +64,9 @@ Caller-supplied Make programs remain outside that boundary. Target-specific
 `override SHELL`/`.SHELLFLAGS`, startup parse-time code from `MAKEFILES` or
 extra `-f` inputs, and the default `PYTHON=python3` lookup through caller
 `PATH` execute with caller authority. Run local verification with a trusted
-`PATH` or an explicit literal `PYTHON=/path/to/python3`.
+`PATH` or an explicit literal `PYTHON=/path/to/python3`. The selected
+interpreter runs repository checkers with `-I -B`, excluding `PYTHONPATH`, user
+site packages, and bytecode output from the verification process.
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
