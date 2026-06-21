@@ -2,9 +2,12 @@
 
 ## 2026-06-21
 
-- Isolated repository verification from PATH-selected or later-makefile tool
-  replacement, caller-controlled shells, startup files, recipes, modes, and
-  Make syntax.
+- Isolated repository verification from later single-colon recipe replacement,
+  unsafe modes, unsafe Make syntax, and caller-selected cleanup paths while
+  documenting target-specific override shells, startup parse-time code, and
+  default PATH-selected Python as caller authority.
+- Isolated the selected Python runtime from `PYTHONPATH`, user-site imports,
+  and bytecode output for every repository checker.
 - Contained Xcode derived-data cleanup beneath the checkout and added a
   regression harness proving hostile caller paths are never removed.
 - Aligned local and hosted verification on the trusted `/usr/bin/make`
