@@ -140,6 +140,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Source, destination, and any resolved current-location coordinate are sent to
   `https://maps.google.com/maps` when the app forwards the transit route. The
   app does not retain those values after forwarding or cancellation.
+- The external handoff accepts only the exact HTTPS Google Maps `/maps` origin
+  and rejects URL credentials, explicit ports, and fragments.
 - Future-dated and older-than-60-second cached locations are ignored while the
   router waits for a fresh coordinate.
 - Missing, invalid-coordinate, and negative-accuracy samples are ignored

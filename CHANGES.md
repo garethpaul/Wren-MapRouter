@@ -1,5 +1,71 @@
 # Changes
 
+## 2026-06-26 13:55 PDT - P2 - Enforce exact Google Maps URL components
+
+### Summary
+
+Extracted external directions admission into a Foundation-only policy and
+closed authority-component gaps beyond the existing scheme, host, and path
+allowlist.
+
+### Work completed
+
+- Added `ExternalDirectionsURLPolicy` and made `AppDelegate` use it before
+  `canOpenURL:` or external forwarding.
+- Preserved exact HTTPS, `maps.google.com`, and `/maps` checks.
+- Rejected URL user names, passwords, all explicit ports, and fragments.
+- Added native XCTest cases for the canonical handoff and hostile URL variants.
+- Added static project/source/test contracts and a hostile mutation that
+  removes explicit-port rejection.
+- External URL admission rejects credentials, explicit ports, and fragments.
+
+### Threads
+
+- Started: none — the bounded routing change was completed directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `GoogleTransit/ExternalDirectionsURLPolicy.h` and
+  `GoogleTransit/ExternalDirectionsURLPolicy.m` — define exact URL admission.
+- `GoogleTransit/AppDelegate.m` — delegates external admission to the policy.
+- `GoogleTransitTests/ExternalDirectionsURLPolicyTests.m` and
+  `GoogleTransit.xcodeproj/project.pbxproj` — add native tests and target files.
+- `scripts/check_wren_maprouter_contracts.py` and
+  `scripts/run_mutation_checks.py` — bind the implementation, tests, project,
+  documentation, and hostile mutation.
+- `README.md`, `SECURITY.md`, `VISION.md`, and
+  `docs/plans/2026-06-26-maprouter-external-url-components.md` — record scope
+  and evidence.
+
+### Validation
+
+- Red-first static gate — failed on the missing policy, AppDelegate delegation,
+  component checks, and Xcode project source registration.
+- Green portable gate — 45 Make authority cases, static contracts, and all
+  eight registered hostile mutations passed from both the checkout and an
+  external working directory.
+- Xcode project inspection found no duplicate 24-character PBX object IDs, and
+  `git diff --check` passed.
+- Local Xcode and XCTest are unavailable; hosted native verification remains
+  authoritative for compilation and runtime tests.
+
+### Bugs / findings
+
+- P2: the old host/path allowlist still admitted decorated Google Maps URLs
+  containing credentials, an explicit port, or a fragment.
+
+### Blockers
+
+- `xcodebuild` is unavailable on the Linux host; hosted macOS verification is
+  required before merge.
+
+### Next action
+
+- Run the final portable gate, review the exact PR head, and merge only after
+  hosted Xcode/XCTest and CodeQL verification pass.
+
 ## 2026-06-26
 
 - Priority P2 cycle: completed the README setup, route-behavior, and location
