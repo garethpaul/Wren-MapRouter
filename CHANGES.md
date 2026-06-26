@@ -48,23 +48,30 @@ allowlist.
   external working directory.
 - Xcode project inspection found no duplicate 24-character PBX object IDs, and
   `git diff --check` passed.
-- Local Xcode and XCTest are unavailable; hosted native verification remains
-  authoritative for compilation and runtime tests.
+- Hosted static-contract jobs passed on Python 3.10, 3.12, and 3.14.
+- Hosted native Xcode build and XCTest passed, and CodeQL Actions and Python
+  analysis passed.
+- The immutable PR head `5f63671901e67b6cd7391175798207d12c594a74`
+  matched the locally reviewed head and merged as
+  `3b04b1dceec474329104851589cef37742f88244`.
+- Manual exact-head review found no actionable issue.
 
 ### Bugs / findings
 
 - P2: the old host/path allowlist still admitted decorated Google Maps URLs
   containing credentials, an explicit port, or a fragment.
 
-### Blockers
+### Review limitations
 
-- `xcodebuild` is unavailable on the Linux host; hosted macOS verification is
-  required before merge.
+- `$codex-review` was attempted against `origin/master`, but the helper stopped
+  before analysis with OpenAI HTTP 401 authentication failure. No review
+  finding was suppressed; the exact diff received an immutable manual review.
+- `xcodebuild` is unavailable on the Linux host, so the passing hosted native
+  job is the authoritative compilation and XCTest evidence.
 
 ### Next action
 
-- Run the final portable gate, review the exact PR head, and merge only after
-  hosted Xcode/XCTest and CodeQL verification pass.
+- Continue repository maintenance from the merged, fully green master head.
 
 ## 2026-06-26
 
