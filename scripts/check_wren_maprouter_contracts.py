@@ -31,6 +31,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-13-maprouter-transient-location-samples.md",
     DOCS_PLANS / "2026-06-14-maprouter-make-root-override-protection.md",
     DOCS_PLANS / "2026-06-21-maprouter-make-authority-isolation.md",
+    DOCS_PLANS / "2026-06-26-wren-readme-routing-guide.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -80,6 +81,35 @@ def main():
     plist = read_plist("GoogleTransit/GoogleTransit-Info.plist", failures)
     workflow = read_text(".github/workflows/check.yml") if WORKFLOW.is_file() else ""
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.is_dir() else []
+    readme = " ".join(read_text("README.md").split())
+    vision = " ".join(read_text("VISION.md").split())
+    changes = " ".join(read_text("CHANGES.md").split())
+
+    for contract in (
+        "This is a directions handoff sample, not a standalone map or route-planning UI.",
+        "iOS 13 or newer",
+        "`GoogleTransit` scheme",
+        "Apple Maps directions request",
+        "bus, ferry, streetcar, subway, or train",
+        "When In Use location permission is requested only when",
+        "permission is denied or restricted",
+        "no more than 60 seconds old",
+        "no worse than 1,000 meters horizontal accuracy",
+        "`https://maps.google.com/maps`",
+        "source, destination, and any resolved current-location coordinate",
+        "clears pending route state",
+    ):
+        require(contract in readme, "README routing guidance must include {0}".format(contract), failures)
+    require(
+        "Keep README setup, route handoff, and location permission behavior aligned with the app" in vision,
+        "VISION must preserve setup, routing, and permission guidance",
+        failures,
+    )
+    require(
+        "Apple Maps-to-Google Maps transit handoff" in changes,
+        "CHANGES must record the documented route handoff",
+        failures,
+    )
 
     try:
         geojson = json.loads(read_text("GoogleTransit/Directions.geojson"))
