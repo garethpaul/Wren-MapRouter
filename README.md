@@ -10,48 +10,92 @@
 
 ## Overview
 
-`garethpaul/Wren-MapRouter` is an Apple platform application or Objective-C/Swift sample. Steve Wren's Map Router
+`garethpaul/Wren-MapRouter` is a legacy Objective-C iOS directions-provider
+sample. It accepts a transit request from Apple Maps and forwards the resolved
+route to the reviewed Google Maps web endpoint.
 
-This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: Objective-C (2), C/C++ headers (1).
+This is a directions handoff sample, not a standalone map or route-planning UI.
+The app itself presents only a blank host window while it resolves and forwards
+an incoming route.
 
 ## Repository Contents
 
-- `README.md` - project overview and local usage notes
-- `GoogleTransit` - source or example code
-- `GoogleTransit.xcodeproj` - Xcode project file
-- `SECURITY.md` - security reporting and disclosure guidance
-- `VISION.md` - project direction and maintenance guardrails
-
-Additional scan context:
-
-- Source directories: GoogleTransit
-- Dependency and build manifests: none detected
-- Entry points or build surfaces: GoogleTransit.xcodeproj
-- Test-looking files: no obvious test files detected
+- `GoogleTransit/AppDelegate.m` - directions-request parsing, location
+  permission, route normalization, cleanup, and external handoff
+- `GoogleTransit/LocationSamplePolicy.m` - finite, fresh, bounded-accuracy
+  current-location selection
+- `GoogleTransit/GoogleTransit-Info.plist` - Maps directions registration,
+  transit modes, and when-in-use permission text
+- `GoogleTransit/Directions.geojson` - worldwide directions-provider coverage
+- `GoogleTransitTests/LocationSamplePolicyTests.m` - native location-policy
+  regression tests
+- `scripts/` and `Makefile` - portable contracts, hostile mutations, Make
+  authority checks, and optional Xcode build/XCTest gates
 
 ## Getting Started
 
 ### Prerequisites
 
 - Git
-- macOS with Xcode for building Apple platform projects
+- macOS with a current Xcode capable of building an iOS 13 or newer target
+- An iOS simulator or device for manual Apple Maps handoff verification
+- No package manager, third-party dependency install, account, API key, or
+  credential file is required
 
 ### Setup
 
 ```bash
 git clone https://github.com/garethpaul/Wren-MapRouter.git
 cd Wren-MapRouter
+open GoogleTransit.xcodeproj
 ```
 
-The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
+In Xcode, select the `GoogleTransit` scheme and an iOS 13 or newer simulator or
+device. Code signing is not required for the repository build gate; a physical
+device run may require your own development team.
 
 ## Running or Using the Project
 
-- Open `GoogleTransit.xcodeproj` in Xcode, choose the app or sample scheme, and run it on the matching simulator/device.
+### Expected Route Behavior
+
+The app registers for Apple Maps directions requests covering bus, ferry,
+streetcar, subway, or train routes. On a simulator or device where Maps exposes
+registered directions providers:
+
+1. Install and launch the `GoogleTransit` target once.
+2. In Apple Maps, create a route and choose Transit.
+3. Select the displayed **Google Directions** provider when Maps offers it.
+4. The provider parses the Apple Maps directions request, resolves both route
+   endpoints, percent-encodes them, and opens
+   `https://maps.google.com/maps` with transit routing selected.
+
+Routes with two concrete endpoints forward immediately. When In Use location
+permission is requested only when the source or destination is **Current
+Location**. The provider waits for the newest valid sample that is no more than
+60 seconds old and no worse than 1,000 meters horizontal accuracy. Missing,
+future-dated, stale, invalid-coordinate, and negative-accuracy samples are
+ignored while a pending current-location route waits for a later usable sample.
+
+If location services are disabled, permission is denied or restricted, the app
+enters the background, endpoint encoding fails, or Core Location reports a
+terminal error, the provider cancels and clears pending route state. A transient
+`kCLErrorLocationUnknown` keeps the request pending. The app retains no route
+history and clears source, destination, and resolved location after forwarding
+or cancellation.
+
+The forwarded Google Maps URL contains the source, destination, and any
+resolved current-location coordinate. Use synthetic routes during verification;
+do not include private home, work, or travel locations in screenshots or logs.
 
 ## Testing and Verification
 
 - `/usr/bin/make check` - runs dependency-free static contracts, Make authority regression tests, focused mutations, and optional Xcode build/XCTest gates when `/usr/bin/xcodebuild` is available
+- `open GoogleTransit.xcodeproj` - opens the project for simulator/device route
+  handoff verification with the `GoogleTransit` scheme
+- `/usr/bin/make build` - builds the iOS 13+ app without code signing when
+  `xcodebuild` is available
+- `/usr/bin/make xctest TEST_DESTINATION="platform=iOS Simulator,id=<UDID>"` -
+  runs the native `GoogleTransitTests` location-policy suite
 - GitHub Actions runs the portable gate on Python 3.10, 3.12, and 3.14 with
   fixed Ubuntu 24.04 runners, read-only permissions, superseded-run
   cancellation, and manual dispatch. A macOS gate also builds the iOS 13+
@@ -68,6 +112,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Completed maintenance plans live under `docs/plans` and are checked by
   `/usr/bin/make check`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
+- See `docs/plans/2026-06-26-wren-readme-routing-guide.md` for the completed
+  setup, route-handoff, permission, privacy, and verification documentation
+  plan.
 
 Repository verification intentionally uses `/usr/bin/make`, anchors default
 tools to literal values, and freezes tool/destination selections before later

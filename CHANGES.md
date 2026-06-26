@@ -1,5 +1,26 @@
 # Changes
 
+## 2026-06-26
+
+- Priority P2 cycle: completed the README setup, route-behavior, and location
+  permission roadmap gaps without changing the archived application or Xcode
+  project.
+- Documented the Apple Maps-to-Google Maps transit handoff, supported transit
+  modes, route-provider invocation, current-location admission policy, terminal
+  cleanup behavior, external coordinate disclosure, and privacy-safe manual
+  verification.
+- Replaced stale generated inventory with the actual routing, permission,
+  coverage, native test, and verification surfaces and added fail-closed static
+  documentation contracts.
+- Portable checkout-local and external-directory gates passed 45 Make authority
+  cases, seven existing source/workflow mutations, static contracts, and syntax
+  checks. Fifteen hostile setup, route, permission, privacy, roadmap, history,
+  and plan mutations were rejected; native build/XCTest remains hosted-macOS
+  evidence.
+- No delegated threads were needed. The next recommended action is to decide
+  whether the sample remains archived or receives a dedicated modern Maps API
+  migration plan.
+
 ## 2026-06-21
 
 - Isolated repository verification from later single-colon recipe replacement,

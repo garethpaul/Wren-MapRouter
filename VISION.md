@@ -31,11 +31,10 @@ Priority:
 - Avoid storing route or location history
 - Keep portable location and external-forwarding contracts running in hosted CI
 - Keep hosted source retrieval credential-free after checkout
+- Keep README setup, route handoff, and location permission behavior aligned with the app
 
 Next priorities:
 
-- Add README setup notes and expected route behavior
-- Document location permission requirements
 - Decide whether the sample is archived or should target modern Maps APIs
 
 Contribution rules:
