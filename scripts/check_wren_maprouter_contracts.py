@@ -32,6 +32,7 @@ CANONICAL_PLANS = [
     DOCS_PLANS / "2026-06-14-maprouter-make-root-override-protection.md",
     DOCS_PLANS / "2026-06-21-maprouter-make-authority-isolation.md",
     DOCS_PLANS / "2026-06-26-wren-readme-routing-guide.md",
+    DOCS_PLANS / "2026-06-26-maprouter-external-url-components.md",
 ]
 WORKFLOW = ROOT / ".github/workflows/check.yml"
 MAKEFILE = ROOT / "Makefile"
@@ -77,6 +78,8 @@ def main():
 
     app = read_text("GoogleTransit/AppDelegate.m")
     location_policy = read_text("GoogleTransit/LocationSamplePolicy.m") if (ROOT / "GoogleTransit/LocationSamplePolicy.m").is_file() else ""
+    external_url_policy = read_text("GoogleTransit/ExternalDirectionsURLPolicy.m") if (ROOT / "GoogleTransit/ExternalDirectionsURLPolicy.m").is_file() else ""
+    external_url_tests = read_text("GoogleTransitTests/ExternalDirectionsURLPolicyTests.m") if (ROOT / "GoogleTransitTests/ExternalDirectionsURLPolicyTests.m").is_file() else ""
     project = read_text("GoogleTransit.xcodeproj/project.pbxproj")
     plist = read_plist("GoogleTransit/GoogleTransit-Info.plist", failures)
     workflow = read_text(".github/workflows/check.yml") if WORKFLOW.is_file() else ""
@@ -98,6 +101,7 @@ def main():
         "`https://maps.google.com/maps`",
         "source, destination, and any resolved current-location coordinate",
         "clears pending route state",
+        "rejects URL credentials, explicit ports, and fragments",
     ):
         require(contract in readme, "README routing guidance must include {0}".format(contract), failures)
     require(
@@ -106,8 +110,18 @@ def main():
         failures,
     )
     require(
+        "Reject external URL credentials, explicit ports, and fragments" in vision,
+        "VISION must preserve the exact external URL component boundary",
+        failures,
+    )
+    require(
         "Apple Maps-to-Google Maps transit handoff" in changes,
         "CHANGES must record the documented route handoff",
+        failures,
+    )
+    require(
+        "External URL admission rejects credentials, explicit ports, and fragments." in changes,
+        "CHANGES must record the exact external URL component boundary",
         failures,
     )
 
@@ -199,23 +213,56 @@ def main():
         failures,
     )
     require(
-        "isAllowedExternalURL" in app
-        and 'isEqualToString:@"https"' in app
-        and 'isEqualToString:@"maps.google.com"' in app,
-        "external URL forwarding must be restricted to HTTPS Google Maps URLs",
+        "ExternalDirectionsURLPolicy" in app
+        and "[ExternalDirectionsURLPolicy isAllowedURL:url]" in app,
+        "AppDelegate must delegate external URL admission to the tested policy",
         failures,
     )
+    for contract in (
+        '[[url scheme] isEqualToString:@"https"]',
+        '[[url host] isEqualToString:@"maps.google.com"]',
+        '[[url path] isEqualToString:@"/maps"]',
+        "[url user] == nil",
+        "[url password] == nil",
+        "[url port] == nil",
+        "[url fragment] == nil",
+    ):
+        require(
+            contract in external_url_policy,
+            "external URL policy must preserve component contract {0}".format(contract),
+            failures,
+        )
+    for test_contract in (
+        "testAllowsCanonicalGoogleMapsDirectionsURL",
+        "testRejectsAuthorityDecorationsAndFragments",
+        "https://user@maps.google.com/maps",
+        "https://maps.google.com:443/maps",
+        "https://maps.google.com:444/maps",
+        "#fragment",
+    ):
+        require(
+            test_contract in external_url_tests,
+            "native tests must preserve external URL contract {0}".format(test_contract),
+            failures,
+        )
     require(
-        '[[url path] isEqualToString:@"/maps"]' in app,
-        "external URL forwarding must be restricted to the Google Maps route path",
-        failures,
-    )
-    require(
-        "[self isAllowedExternalURL:url]" in app
-        and app.index("[self isAllowedExternalURL:url]") < app.index("canOpenURL:url"),
+        "[ExternalDirectionsURLPolicy isAllowedURL:url]" in app
+        and app.index("[ExternalDirectionsURLPolicy isAllowedURL:url]") < app.index("canOpenURL:url"),
         "external URL allowlist must be checked before canOpenURL/openURL",
         failures,
     )
+    for project_contract in (
+        "ExternalDirectionsURLPolicy.h",
+        "ExternalDirectionsURLPolicy.m",
+        "ExternalDirectionsURLPolicy.m in Sources",
+        "ExternalDirectionsURLPolicyTests.m",
+        "ExternalDirectionsURLPolicyTests.m in Sources",
+    ):
+        require(
+            project_contract in project,
+            "Xcode project must include {0}".format(project_contract),
+            failures,
+        )
     require(
         "openTransitDirections" in app and "clearPendingRoute" in app,
         "route state must be cleared after forwarding or cancellation",

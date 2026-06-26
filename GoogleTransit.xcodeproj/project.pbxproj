@@ -12,6 +12,8 @@
 		A10000000000000000000004 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* XCTest.framework */; };
 		A10000000000000000000005 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F44E8EF2160B501700DED148 /* CoreLocation.framework */; };
 		A10000000000000000000006 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F4C2EB160B396F0055EF42 /* Foundation.framework */; };
+		A20000000000000000000001 /* ExternalDirectionsURLPolicyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* ExternalDirectionsURLPolicyTests.m */; };
+		A20000000000000000000002 /* ExternalDirectionsURLPolicy.m in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* ExternalDirectionsURLPolicy.m */; };
 		F44E8EF3160B501700DED148 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F44E8EF2160B501700DED148 /* CoreLocation.framework */; };
 		F4F4C2EA160B396F0055EF42 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F4C2E9160B396F0055EF42 /* UIKit.framework */; };
 		F4F4C2EC160B396F0055EF42 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F4C2EB160B396F0055EF42 /* Foundation.framework */; };
@@ -41,6 +43,9 @@
 		B10000000000000000000003 /* LocationSamplePolicyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocationSamplePolicyTests.m; sourceTree = "<group>"; };
 		B10000000000000000000004 /* GoogleTransitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GoogleTransitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10000000000000000000005 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
+		B20000000000000000000001 /* ExternalDirectionsURLPolicyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExternalDirectionsURLPolicyTests.m; sourceTree = "<group>"; };
+		B20000000000000000000002 /* ExternalDirectionsURLPolicy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExternalDirectionsURLPolicy.h; sourceTree = "<group>"; };
+		B20000000000000000000003 /* ExternalDirectionsURLPolicy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExternalDirectionsURLPolicy.m; sourceTree = "<group>"; };
 		F44E8EF2160B501700DED148 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		F4F4C2E5160B396F0055EF42 /* GoogleTransit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GoogleTransit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4F4C2E9160B396F0055EF42 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -122,6 +127,8 @@
 			children = (
 				F4F4C2F8160B39700055EF42 /* AppDelegate.h */,
 				F4F4C2F9160B39700055EF42 /* AppDelegate.m */,
+				B20000000000000000000002 /* ExternalDirectionsURLPolicy.h */,
+				B20000000000000000000003 /* ExternalDirectionsURLPolicy.m */,
 				B10000000000000000000001 /* LocationSamplePolicy.h */,
 				B10000000000000000000002 /* LocationSamplePolicy.m */,
 				F4F4C2F0160B396F0055EF42 /* Supporting Files */,
@@ -148,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				B10000000000000000000003 /* LocationSamplePolicyTests.m */,
+				B20000000000000000000001 /* ExternalDirectionsURLPolicyTests.m */,
 			);
 			path = GoogleTransitTests;
 			sourceTree = "<group>";
@@ -244,6 +252,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000003 /* LocationSamplePolicyTests.m in Sources */,
+				A20000000000000000000001 /* ExternalDirectionsURLPolicyTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,6 +262,7 @@
 			files = (
 				F4F4C2F6160B396F0055EF42 /* main.m in Sources */,
 				F4F4C2FA160B39700055EF42 /* AppDelegate.m in Sources */,
+				A20000000000000000000002 /* ExternalDirectionsURLPolicy.m in Sources */,
 				A10000000000000000000001 /* LocationSamplePolicy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

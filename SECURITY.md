@@ -47,6 +47,7 @@ Forwarding opens Google Maps with source and destination query parameters; a
 Current Location endpoint therefore transmits the selected coordinate to
 Google. The sample must not persist those route values or forward them to any
 other host.
+External URL admission rejects credentials, explicit ports, and fragments.
 
 ## Dependency and Supply Chain Security
 

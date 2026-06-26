@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "ExternalDirectionsURLPolicy.h"
 #import "LocationSamplePolicy.h"
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
@@ -231,7 +232,7 @@
 		return;
 	}
 
-	if (![self isAllowedExternalURL:url]){
+	if (![ExternalDirectionsURLPolicy isAllowedURL:url]){
 		return;
 	}
 
@@ -241,13 +242,6 @@
 			[application openURL:url options:@{} completionHandler:nil];
 		}
 	});
-}
-
-- (BOOL) isAllowedExternalURL:(NSURL *)url
-{
-	return [[url scheme] isEqualToString:@"https"] &&
-		[[url host] isEqualToString:@"maps.google.com"] &&
-		[[url path] isEqualToString:@"/maps"];
 }
 
 - (void)locationManager:(CLLocationManager *)manager

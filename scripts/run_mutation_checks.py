@@ -33,6 +33,11 @@ MUTATIONS = {
         "[locations reverseObjectEnumerator]",
         "locations",
     ),
+    "external URL explicit-port rejection": (
+        "GoogleTransit/ExternalDirectionsURLPolicy.m",
+        "        [url port] == nil &&\n",
+        "",
+    ),
     "launch root controller": (
         "GoogleTransit/AppDelegate.m",
         "    self.window.rootViewController = [[UIViewController alloc] init];\n",
