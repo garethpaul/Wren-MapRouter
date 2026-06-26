@@ -42,5 +42,10 @@ make the exact authority and fragment boundary explicit.
   static contracts, and all eight hostile mutations.
 - Xcode project inspection found no duplicate PBX object IDs, and
   `git diff --check` passed.
-- Exact-head review, hosted Xcode/XCTest, and CodeQL evidence remain the final
-  pre-merge actions.
+- Hosted static contracts passed on Python 3.10, 3.12, and 3.14; hosted native
+  Xcode build/XCTest and CodeQL Actions/Python analysis also passed.
+- `$codex-review` stopped before analysis with OpenAI HTTP 401 authentication
+  failure. Manual immutable review of exact head
+  `5f63671901e67b6cd7391175798207d12c594a74` found no actionable issue.
+- The reviewed head merged to master as
+  `3b04b1dceec474329104851589cef37742f88244`.
